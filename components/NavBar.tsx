@@ -1,70 +1,48 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutDashboard, MessageCircle, Search, Sparkles, Camera, Shield, Phone } from 'lucide-react';
-import { clsx } from 'clsx';
+import { Home, BarChart3, MessageSquare, Smartphone, Droplet, Eye, Phone } from 'lucide-react';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
-
+  
+  const isActive = (path: string) => location.pathname === path;
+  
   const navItems = [
-    { label: 'Home', path: '/', icon: Home, color: 'text-primary' },
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, color: 'text-secondary' },
-    { label: 'Live Expert', path: '/live', icon: Phone, color: 'text-danger' }, // New Feature Highlight
-    { label: 'AI Chat', path: '/assistant', icon: MessageCircle, color: 'text-accent' },
-    { label: 'Checker', path: '/checker', icon: Search, color: 'text-success' },
-    { label: 'Scanner', path: '/scan', icon: Camera, color: 'text-primary' },
-    { label: 'Guide', path: '/cleanup', icon: Sparkles, color: 'text-secondary' },
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
+    { path: '/assistant', label: 'AI Chat', icon: MessageSquare },
+    { path: '/checker', label: 'Checker', icon: Smartphone },
+    { path: '/cleanup', label: 'Cleanup', icon: Droplet },
+    { path: '/scan', label: 'Scan', icon: Eye },
+    { path: '/live', label: 'Live Expert', icon: Phone },
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-full w-16 md:w-64 bg-surface border-r border-white/5 flex flex-col z-50 transition-all duration-300">
-      <div className="p-4 flex items-center justify-center md:justify-start gap-3 border-b border-white/5 h-20">
-        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary shrink-0">
-          <Shield size={24} />
-        </div>
-        <div className="hidden md:block">
-          <h1 className="font-display text-xl tracking-wider text-white">SafeGuard</h1>
-          <p className="text-xs text-muted">Fiberglass Helper</p>
-        </div>
+    <nav className="fixed left-0 top-0 h-screen w-16 md:w-64 bg-surface border-r border-white/10 flex flex-col p-4 z-50">
+      <div className="mb-8">
+        <h1 className="hidden md:block gradient-text font-display text-2xl font-bold">MFS</h1>
+        <div className="md:hidden text-accent text-2xl">⚔️</div>
+      </div>
+      
+      <div className="space-y-4 flex-1">
+        {navItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+              isActive(item.path)
+                ? 'bg-primary/20 text-primary border border-primary/30'
+                : 'text-muted hover:text-text hover:bg-surface-light/50'
+            }`}
+          >
+            <item.icon size={20} />
+            <span className="hidden md:inline">{item.label}</span>
+          </Link>
+        ))}
       </div>
 
-      <div className="flex-1 py-6 space-y-2 px-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={clsx(
-                "flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
-                isActive ? "bg-black/20 shadow-inner" : "hover:bg-white/5"
-              )}
-            >
-              <div className={clsx(
-                "p-2 rounded-lg transition-colors",
-                isActive ? "bg-white/5 text-white" : item.color
-              )}>
-                <item.icon size={20} />
-              </div>
-              <span className={clsx(
-                "hidden md:block font-medium transition-colors",
-                isActive ? "text-white" : "text-muted group-hover:text-white"
-              )}>
-                {item.label}
-              </span>
-              
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-
-      <div className="p-4 border-t border-white/5">
-        <div className="neuro-inset p-3 rounded-xl hidden md:block">
-          <p className="text-xs text-muted text-center">Powered by<br/><span className="text-primary font-bold">Gemini 3 Pro</span></p>
-        </div>
+      <div className="border-t border-white/10 pt-4">
+        <div className="text-xs text-muted hidden md:block">v1.0 Beta</div>
       </div>
     </nav>
   );
