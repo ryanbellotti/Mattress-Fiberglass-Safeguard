@@ -1,162 +1,114 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { Play, Square, CheckCircle, Circle, AlertTriangle, ArrowRight } from 'lucide-react';
-import { generateSpeech } from '../services/geminiService';
-import { base64ToUint8Array, decodeAudioData } from '../utils/audioUtils';
-
-const steps = [
-  {
-    title: "Immediate Containment",
-    desc: "Stop moving! Turn off all HVAC/fans immediately. Close the door to the affected room. Put on an N95 mask if available.",
-    detail: "Movement spreads particles. Airflow spreads particles. Isolation is your first priority."
-  },
-  {
-    title: "Personal Protection",
-    desc: "Do not touch the fiberglass with bare skin. Wear long sleeves, gloves, and eye protection.",
-    detail: "Fiberglass splinters can embed in skin and eyes causing severe irritation."
-  },
-  {
-    title: "Assess the Spread",
-    desc: "Use a flashlight in a dark room. Shine it parallel to surfaces. Fiberglass sparkles like diamond dust.",
-    detail: "Check surfaces up to 10 feet away from the mattress first, then check the floor."
-  },
-  {
-    title: "Proper Removal",
-    desc: "Do NOT use a standard vacuum unless it is a sealed HEPA unit. Standard vacuums blow particles back into the air.",
-    detail: "Use damp paper towels to wipe up particles, folding them inwards. Use lint rollers for clothes."
-  }
-];
+import React, { useState } from 'react';
+import { CheckCircle2, AlertTriangle, Droplet } from 'lucide-react';
+import { CleanupStep } from '../types';
 
 const CleanupGuide: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const [steps, setSteps] = useState<CleanupStep[]>([
+    {
+      id: 1,
+      title: 'Prepare the Area',
+      description: 'Ensure good ventilation. Open windows and use fans. Wear protective equipment including gloves and an N95 mask.',
+      isCompleted: false,
+    },
+    {
+      id: 2,
+      title: 'Vacuum the Mattress',
+      description: 'Use a HEPA filter vacuum to gently vacuum the mattress surface. Use slow, overlapping strokes to trap fiberglass particles.',
+      isCompleted: false,
+    },
+    {
+      id: 3,
+      title: 'Use Wet Cleaning',
+      description: 'Dampen a cloth with distilled water and wipe down the mattress. This helps capture remaining particles.',
+      isCompleted: false,
+    },
+    {
+      id: 4,
+      title: 'Seal if Necessary',
+      description: 'Consider using a mattress encasement to prevent future fiberglass release.',
+      isCompleted: false,
+    },
+  ]);
 
-  // Cleanup on unmount to prevent memory leaks and stop audio
-  useEffect(() => {
-    return () => {
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, []);
-
-  const handlePlayAudio = async (text: string) => {
-    if (isPlaying) {
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-        sourceRef.current = null;
-      }
-      setIsPlaying(false);
-      return;
-    }
-
-    setIsLoadingAudio(true);
-    try {
-      const base64Audio = await generateSpeech(text);
-      if (base64Audio) {
-        if (!audioContextRef.current) {
-          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-          audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
-        }
-        
-        // Gemini TTS returns raw PCM audio data, which requires manual decoding
-        const audioData = base64ToUint8Array(base64Audio);
-        const buffer = await decodeAudioData(audioData, audioContextRef.current, 24000, 1);
-        
-        const source = audioContextRef.current.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioContextRef.current.destination);
-        source.onended = () => {
-          setIsPlaying(false);
-          sourceRef.current = null;
-        };
-        source.start(0);
-        sourceRef.current = source;
-        setIsPlaying(true);
-      }
-    } catch (error) {
-      console.error("Audio error", error);
-    } finally {
-      setIsLoadingAudio(false);
-    }
+  const toggleStep = (id: number) => {
+    setSteps(steps.map(step => 
+      step.id === id ? { ...step, isCompleted: !step.isCompleted } : step
+    ));
   };
 
+  const completedCount = steps.filter(s => s.isCompleted).length;
+
   return (
-    <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 h-full">
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-4xl font-display tracking-wide text-white mb-2">Cleanup Protocol</h1>
-          <p className="text-muted">Follow these steps exactly. Use the audio guide for hands-free assistance.</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-4xl font-bold gradient-text mb-2">Cleanup Guide</h1>
+        <p className="text-muted">Step-by-step fiberglass cleanup process</p>
+      </div>
+
+      <div className="glass-card p-6 bg-gradient-to-r from-danger/10 to-secondary/10">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="text-danger flex-shrink-0 mt-1" size={24} />
+          <div>
+            <h3 className="font-semibold mb-1">Safety First</h3>
+            <p className="text-sm text-muted">Always wear protective equipment (N95 mask, gloves) when dealing with fiberglass. Ensure proper ventilation throughout the process.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-card p-6">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-lg">Progress</h3>
+            <span className="text-accent font-bold">{completedCount}/{steps.length}</span>
+          </div>
+          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-secondary transition-all"
+              style={{ width: `${(completedCount / steps.length) * 100}%` }}
+            ></div>
+          </div>
         </div>
 
         <div className="space-y-4">
-          {steps.map((step, index) => (
-            <div 
-              key={index}
-              onClick={() => setActiveStep(index)}
-              className={`neuro-card p-4 flex items-center gap-4 cursor-pointer transition-all ${
-                activeStep === index ? 'border-primary bg-primary/5' : 'hover:bg-white/5'
+          {steps.map((step) => (
+            <div
+              key={step.id}
+              onClick={() => toggleStep(step.id)}
+              className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                step.isCompleted
+                  ? 'bg-success/10 border-success/30'
+                  : 'bg-white/5 border-white/10 hover:border-primary/30'
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                activeStep === index ? 'bg-primary text-white' : 'neuro-inset text-muted'
-              }`}>
-                {index + 1}
+              <div className="flex items-start gap-3">
+                <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  step.isCompleted
+                    ? 'bg-success border-success'
+                    : 'border-white/20'
+                }`}> 
+                  {step.isCompleted && <CheckCircle2 size={16} className="text-white" />}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold">{step.title}</h4>
+                  <p className="text-sm text-muted mt-1">{step.description}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className={`font-bold ${activeStep === index ? 'text-white' : 'text-gray-400'}`}>
-                  {step.title}
-                </h3>
-              </div>
-              {activeStep === index && <ArrowRight className="text-primary" size={20} />}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="neuro-card p-8 flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4">
-          <div className="bg-danger/10 text-danger border border-danger/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-            <AlertTriangle size={12} /> CRITICAL
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col justify-center space-y-6">
-          <h2 className="text-3xl font-display text-white">{steps[activeStep].title}</h2>
-          <p className="text-xl text-gray-200 leading-relaxed">{steps[activeStep].desc}</p>
-          <div className="bg-white/5 p-4 rounded-xl border-l-4 border-accent">
-            <p className="text-muted text-sm">{steps[activeStep].detail}</p>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-white/5">
-          <button
-            onClick={() => handlePlayAudio(`${steps[activeStep].title}. ${steps[activeStep].desc} ${steps[activeStep].detail}`)}
-            className={`w-full neuro-btn py-4 flex items-center justify-center gap-3 font-bold transition-all ${
-              isPlaying ? 'bg-accent text-white' : 'hover:bg-white/5 text-text'
-            }`}
-          >
-            {isLoadingAudio ? (
-              <span>Loading Audio...</span>
-            ) : isPlaying ? (
-              <>
-                <Square size={20} fill="currentColor" /> Stop Reading
-              </>
-            ) : (
-              <>
-                <Play size={20} fill="currentColor" /> Read Instructions Aloud
-              </>
-            )}
-          </button>
-          <p className="text-center text-xs text-muted mt-3">Powered by Gemini 2.5 TTS</p>
-        </div>
+      <div className="glass-card p-6">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <Droplet className="text-accent" size={20} />
+          Additional Resources
+        </h3>
+        <ul className="space-y-2 text-sm text-muted">
+          <li>• EPA guidelines on fiberglass safety</li>
+          <li>• Contact a professional if you have concerns</li>
+          <li>• Dispose of fiberglass materials properly</li>
+          <li>• Monitor for any respiratory issues</li>
+        </ul>
       </div>
     </div>
   );
