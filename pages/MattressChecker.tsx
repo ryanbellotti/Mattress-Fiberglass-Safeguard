@@ -1,114 +1,113 @@
 import React, { useState } from 'react';
-import { Upload, CheckCircle, AlertTriangle } from 'lucide-react';
-import { MattressBrand } from '../types';
+import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { checkBrandWithSearch } from '../services/geminiService';
 
 const MattressChecker: React.FC = () => {
-  const [selectedBrand, setSelectedBrand] = useState<MattressBrand | null>(null);
-  const [searchInput, setSearchInput] = useState('');
+  const [query, setQuery] = useState('');
+  const [result, setResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const sampleBrands: MattressBrand[] = [
-    {
-      id: '1',
-      brand_name: 'Premium Sleep Co',
-      model_name: 'CloudComfort 2023',
-      contains_fiberglass: true,
-      fiberglass_history: 'Known fiberglass barrier in premium models',
-      risk_level: 'high',
-      year_info: '2020-2023',
-      citations: ['Consumer Report #2023-001', 'Safety Database #DB-445'],
-    },
-    {
-      id: '2',
-      brand_name: 'SafeRest',
-      model_name: 'Natural Sleep',
-      contains_fiberglass: false,
-      fiberglass_history: 'No fiberglass materials used',
-      risk_level: 'none',
-      year_info: '2021-Present',
-    },
-  ];
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
 
-  const filteredBrands = sampleBrands.filter((b) =>
-    b.brand_name.toLowerCase().includes(searchInput.toLowerCase())
-  );
+    setIsLoading(true);
+    setResult(null);
+
+    try {
+      const data = await checkBrandWithSearch(query);
+      setResult(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getRiskColor = (level: string) => {
+    switch (level?.toLowerCase()) {
+      case 'high': return 'text-danger border-danger/50 bg-danger/10';
+      case 'medium': return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
+      case 'low': return 'text-success border-success/50 bg-success/10';
+      default: return 'text-muted border-white/10 bg-white/5';
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold gradient-text mb-2">Mattress Checker</h1>
-        <p className="text-muted">Search our database for fiberglass contamination</p>
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-display tracking-wide text-white">Fiberglass Checker</h1>
+        <p className="text-muted max-w-xl mx-auto">
+          Enter a brand or model name. We use <strong>Gemini Search Grounding</strong> to scour the web for the latest reports, lawsuits, and ingredient lists.
+        </p>
       </div>
 
-      <div className="glass-card p-8 border-2 border-dashed border-white/20 rounded-xl text-center cursor-pointer hover:border-primary/50 transition-colors">
-        <Upload className="mx-auto mb-4 text-primary" size={32} />
-        <p className="text-lg font-semibold mb-2">Upload Mattress Image</p>
-        <p className="text-sm text-muted">or search our database below</p>
+      <div className="neuro-card p-8">
+        <form onSubmit={handleSearch} className="flex gap-4">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="e.g., Zinus Green Tea, Nectar, Ashley Chime..."
+            className="flex-1 neuro-inset px-6 py-4 text-lg bg-transparent text-white outline-none focus:ring-2 ring-primary/50 transition-all"
+          />
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="neuro-btn neuro-btn-primary px-8 py-4 font-bold flex items-center gap-2"
+          >
+            {isLoading ? <Loader2 className="animate-spin" /> : <Search />}
+            Check
+          </button>
+        </form>
       </div>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Search mattress brands..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="w-full neuro-inset px-4 py-3 text-text outline-none mb-4"
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredBrands.map((brand) => (
-            <div
-              key={brand.id}
-              onClick={() => setSelectedBrand(brand)}
-              className={`glass-card p-6 cursor-pointer transition-all ${
-                selectedBrand?.id === brand.id
-                  ? 'border-primary/50 bg-primary/10'
-                  : 'hover:border-white/20'
-              }`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-lg">{brand.brand_name}</h3>
-                  <p className="text-sm text-muted">{brand.model_name}</p>
-                </div>
-                {brand.contains_fiberglass ? (
-                  <AlertTriangle className="text-danger" size={20} />
-                ) : (
-                  <CheckCircle className="text-success" size={20} />
-                )}
-              </div>
-              <p className="text-sm mb-3">{brand.fiberglass_history}</p>
-              <div className="flex gap-2 items-center">
-                <span className={`px-3 py-1 rounded text-xs font-semibold ${
-                  brand.risk_level === 'high'
-                    ? 'bg-danger/20 text-danger'
-                    : brand.risk_level === 'none'
-                    ? 'bg-success/20 text-success'
-                    : 'bg-warning/20 text-warning'
-                }`}>
-                  {brand.risk_level.toUpperCase()}
-                </span>
+      {result && (
+        <div className="neuro-card p-8 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-1 capitalize">{query}</h2>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold border ${getRiskColor(result.riskLevel)}`}>
+                {result.riskLevel === 'high' && <AlertTriangle size={16} />}
+                {result.riskLevel === 'medium' && <HelpCircle size={16} />}
+                {result.riskLevel === 'low' && <CheckCircle size={16} />}
+                Risk Level: {result.riskLevel?.toUpperCase()}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {selectedBrand && (
-        <div className="glass-card p-6 border-l-4 border-primary">
-          <h2 className="text-2xl font-semibold mb-4 gradient-text">Details for {selectedBrand.brand_name}</h2>
-          <div className="space-y-3">
-            <p><strong>Status:</strong> {selectedBrand.contains_fiberglass ? '⚠️ Contains Fiberglass' : '✅ Safe'}</p>
-            <p><strong>Risk Level:</strong> {selectedBrand.risk_level.toUpperCase()}</p>
-            <p><strong>Years:</strong> {selectedBrand.year_info}</p>
-            {selectedBrand.citations && (
-              <div>
-                <strong>Sources:</strong>
-                <ul className="list-disc list-inside text-sm text-muted mt-2">
-                  {selectedBrand.citations.map((c, i) => <li key={i}>{c}</li>)}
-                </ul>
-              </div>
-            )}
+            
+            <div className="text-right">
+              <span className={`text-4xl font-display ${result.containsFiberglass ? 'text-danger' : 'text-success'}`}>
+                {result.containsFiberglass ? 'YES' : 'LIKELY NO'}
+              </span>
+              <p className="text-xs text-muted uppercase tracking-wider">Fiberglass Detected</p>
+            </div>
           </div>
+
+          <div className="bg-white/5 rounded-xl p-6 mb-6">
+            <h3 className="text-sm font-bold text-muted uppercase tracking-wider mb-2">AI Analysis Summary</h3>
+            <p className="text-gray-200 leading-relaxed">{result.summary}</p>
+          </div>
+
+          {result.sources && result.sources.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-muted uppercase tracking-wider mb-3">Sources (Google Search)</h3>
+              <ul className="space-y-2">
+                {result.sources.map((source: string, i: number) => (
+                  <li key={i}>
+                    <a 
+                      href={source} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-accent hover:underline text-sm truncate"
+                    >
+                      <ExternalLink size={14} />
+                      {source}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -14,7 +14,8 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: Date;
-  isThinking?: boolean; // For Gemini Thinking mode UI
+  isThinking?: boolean;
+  sources?: { web?: { title: string, uri: string } }[];
 }
 
 export interface GroundingSource {

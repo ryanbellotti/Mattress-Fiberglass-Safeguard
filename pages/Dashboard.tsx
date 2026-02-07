@@ -1,50 +1,36 @@
 import React from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Activity, Shield, AlertTriangle } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const stats = [
-    { label: 'Mattresses Checked', value: '2,341', icon: BarChart3, color: 'text-primary' },
-    { label: 'Contaminations Found', value: '187', icon: AlertTriangle, color: 'text-danger' },
-    { label: 'Success Rate', value: '98.5%', icon: CheckCircle, color: 'text-success' },
-    { label: 'Active Users', value: '1,203', icon: TrendingUp, color: 'text-accent' },
-  ];
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold gradient-text mb-2">Dashboard</h1>
-        <p className="text-muted">System overview and statistics</p>
-      </div>
+    <div className="max-w-5xl mx-auto space-y-8">
+      <h1 className="text-3xl font-display tracking-wide text-white">My Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="glass-card p-6 hover:border-white/20 transition-all">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <p className="text-muted text-sm mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold">{stat.value}</p>
-              </div>
-              <stat.icon className={`${stat.color}`} size={24} />
-            </div>
-            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full w-3/4 bg-gradient-to-r from-primary to-secondary"></div>
-            </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="neuro-card p-6">
+          <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+             <Link to="/checker" className="block p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between">
+                <span className="font-medium text-gray-200">Check Mattress Brand</span>
+                <Shield size={18} className="text-secondary" />
+             </Link>
+             <Link to="/scan" className="block p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between">
+                <span className="font-medium text-gray-200">Scan Label Photo</span>
+                <Activity size={18} className="text-primary" />
+             </Link>
+             <Link to="/cleanup" className="block p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-between">
+                <span className="font-medium text-gray-200">Emergency Cleanup</span>
+                <AlertTriangle size={18} className="text-danger" />
+             </Link>
           </div>
-        ))}
-      </div>
+        </div>
 
-      <div className="glass-card p-6">
-        <h2 className="text-xl font-semibold mb-4 text-accent">Recent Activity</h2>
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div>
-                <p className="font-medium">Mattress Check #{i}</p>
-                <p className="text-sm text-muted">2 hours ago</p>
-              </div>
-              <span className="text-success text-sm font-semibold">Clean</span>
-            </div>
-          ))}
+        <div className="neuro-card p-6 bg-gradient-to-br from-primary/20 to-surface border-primary/20">
+          <h2 className="text-xl font-bold text-white mb-2">Did you know?</h2>
+          <p className="text-gray-300 leading-relaxed">
+            Removing the outer cover of a mattress containing fiberglass is the #1 cause of contamination events. Always check the label for "Do Not Remove Cover" warnings, even if there is a zipper.
+          </p>
         </div>
       </div>
     </div>
