@@ -9,16 +9,16 @@ import CleanupGuide from './pages/CleanupGuide';
 import Visualizer from './components/Visualizer';
 import LiveExpert from './pages/LiveExpert';
 import SafetyLab from './pages/SafetyLab';
+import Assessment from './pages/Assessment';
 import DisclaimerModal from './components/DisclaimerModal';
 
-// Placeholder Components
+// Placeholder Components for secondary routes
 const EducationHub = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Education Hub</h1><p className="text-muted">Researching health impacts and manufacturing laws.</p></div>;
-const Assessment = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Risk Assessment</h1><p className="text-muted">Determining exposure vectors.</p></div>;
-const CommunityForum = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Community Nexus</h1><p className="text-muted">Link to Facebook Support Group.</p></div>;
-const Resources = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Verified Resources</h1><p className="text-muted">Suppliers and state-level data.</p></div>;
-const OrganizationResources = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">mattressfiberglass.org</h1><p className="text-muted">Official documentation center.</p></div>;
-const ReportIncident = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Report Protocol</h1><p className="text-muted">Submitting to registry.</p></div>;
-const ContactUs = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Contact Admin</h1><p className="text-muted">Direct co-founder line.</p></div>;
+const CommunityForum = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Community Nexus</h1><p className="text-muted">Direct connection to the Facebook Support Group community.</p></div>;
+const Resources = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Verified Resources</h1><p className="text-muted">Safety supply chain data.</p></div>;
+const OrganizationResources = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">mattressfiberglass.org</h1><p className="text-muted">Official document repository.</p></div>;
+const ReportIncident = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Registry Report</h1><p className="text-muted">Incident logging for regulatory tracking.</p></div>;
+const ContactUs = () => <div className="p-10"><h1 className="text-4xl font-display mb-4 uppercase">Contact Nexus</h1><p className="text-muted">Direct co-founder line.</p></div>;
 
 const App: React.FC = () => {
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);

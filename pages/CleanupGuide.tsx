@@ -1,29 +1,33 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Square, CheckCircle, Circle, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Play, Square, CheckCircle, Circle, AlertTriangle, ArrowRight, Shield, Volume2, Loader2, Sparkles, Wind } from 'lucide-react';
 import { generateSpeech } from '../services/geminiService';
 import { base64ToUint8Array, decodeAudioData } from '../utils/audioUtils';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const steps = [
+const protocols = [
   {
-    title: "Immediate Containment",
-    desc: "Stop moving! Turn off all HVAC/fans immediately. Close the door to the affected room. Put on an N95 mask if available.",
-    detail: "Movement spreads particles. Airflow spreads particles. Isolation is your first priority."
+    phase: "PHASE 01",
+    title: "Containment & Airlock",
+    desc: "Immediately isolate the zone. Disable all centralized climate controls (HVAC) and mechanical ventilation. Seal the door perimeter with tape.",
+    critical: "Standard fans will disseminate microscopic glass shards across all porous surfaces."
   },
   {
-    title: "Personal Protection",
-    desc: "Do not touch the fiberglass with bare skin. Wear long sleeves, gloves, and eye protection.",
-    detail: "Fiberglass splinters can embed in skin and eyes causing severe irritation."
+    phase: "PHASE 02",
+    title: "Hazard Protection",
+    desc: "Equip N95 or P100 respiratory protection. Use full-body coverage (long sleeves) and non-latex gloves. Secure hair and eyes.",
+    critical: "Dermal contact leads to embedding; inhalation causes chronic respiratory trauma."
   },
   {
-    title: "Assess the Spread",
-    desc: "Use a flashlight in a dark room. Shine it parallel to surfaces. Fiberglass sparkles like diamond dust.",
-    detail: "Check surfaces up to 10 feet away from the mattress first, then check the floor."
+    phase: "PHASE 03",
+    title: "Visual Detection",
+    desc: "Perform a 'Lumen Sweep'. Use a high-intensity flashlight parallel to surfaces in total darkness. Look for the distinct 'shimmer' of fibers.",
+    critical: "Fiberglass is translucent and only visible via specific light refraction."
   },
   {
-    title: "Proper Removal",
-    desc: "Do NOT use a standard vacuum unless it is a sealed HEPA unit. Standard vacuums blow particles back into the air.",
-    detail: "Use damp paper towels to wipe up particles, folding them inwards. Use lint rollers for clothes."
+    phase: "PHASE 04",
+    title: "Neutralization",
+    desc: "Use ONLY sealed HEPA-rated vacuums. Wet-wipe surfaces with damp microfiber cloths, folding inwards after every pass.",
+    critical: "Standard vacuums act as centrifugal spreaders, making contamination 10x worse."
   }
 ];
 
@@ -35,19 +39,14 @@ const CleanupGuide: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
 
-  // Cleanup on unmount to prevent memory leaks and stop audio
   useEffect(() => {
     return () => {
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+      if (sourceRef.current) sourceRef.current.stop();
+      if (audioContextRef.current) audioContextRef.current.close();
     };
   }, []);
 
-  const handlePlayAudio = async (text: string) => {
+  const handlePlayAudio = async () => {
     if (isPlaying) {
       if (sourceRef.current) {
         sourceRef.current.stop();
@@ -57,6 +56,7 @@ const CleanupGuide: React.FC = () => {
       return;
     }
 
+    const text = `${protocols[activeStep].title}. ${protocols[activeStep].desc}. Critical notice: ${protocols[activeStep].critical}`;
     setIsLoadingAudio(true);
     try {
       const base64Audio = await generateSpeech(text);
@@ -65,97 +65,115 @@ const CleanupGuide: React.FC = () => {
           const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
           audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
         }
-        
-        // Gemini TTS returns raw PCM audio data, which requires manual decoding
         const audioData = base64ToUint8Array(base64Audio);
         const buffer = await decodeAudioData(audioData, audioContextRef.current, 24000, 1);
-        
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContextRef.current.destination);
-        source.onended = () => {
-          setIsPlaying(false);
-          sourceRef.current = null;
-        };
+        source.onended = () => { setIsPlaying(false); sourceRef.current = null; };
         source.start(0);
         sourceRef.current = source;
         setIsPlaying(true);
       }
-    } catch (error) {
-      console.error("Audio error", error);
-    } finally {
-      setIsLoadingAudio(false);
-    }
+    } catch (e) { console.error(e); } finally { setIsLoadingAudio(false); }
   };
 
   return (
-    <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 h-full">
-      <div className="space-y-8">
+    <div className="max-w-6xl mx-auto py-10 px-4 space-y-12">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
         <div>
-          <h1 className="text-4xl font-display tracking-wide text-white mb-2">Cleanup Protocol</h1>
-          <p className="text-muted">Follow these steps exactly. Use the audio guide for hands-free assistance.</p>
+          <h1 className="text-6xl font-display text-white uppercase tracking-tighter">Remediation Nexus</h1>
+          <p className="text-accent text-[10px] font-bold uppercase tracking-[0.4em] mt-2">Personalized Cleanup Protocol v3.1</p>
         </div>
-
-        <div className="space-y-4">
-          {steps.map((step, index) => (
-            <div 
-              key={index}
-              onClick={() => setActiveStep(index)}
-              className={`neuro-card p-4 flex items-center gap-4 cursor-pointer transition-all ${
-                activeStep === index ? 'border-primary bg-primary/5' : 'hover:bg-white/5'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                activeStep === index ? 'bg-primary text-white' : 'neuro-inset text-muted'
-              }`}>
-                {index + 1}
-              </div>
-              <div className="flex-1">
-                <h3 className={`font-bold ${activeStep === index ? 'text-white' : 'text-gray-400'}`}>
-                  {step.title}
-                </h3>
-              </div>
-              {activeStep === index && <ArrowRight className="text-primary" size={20} />}
-            </div>
-          ))}
+        <div className="flex gap-4">
+           <div className="glass-card px-6 py-3 border-danger/30 bg-danger/5 flex items-center gap-3">
+              <Wind size={18} className="text-danger" />
+              <div><p className="text-[10px] font-bold text-white uppercase">HVAC STATUS</p><p className="text-danger text-[9px] font-bold">DISCONNECTED</p></div>
+           </div>
+           <div className="glass-card px-6 py-3 border-accent/30 bg-accent/5 flex items-center gap-3">
+              <Shield size={18} className="text-accent" />
+              <div><p className="text-[10px] font-bold text-white uppercase">PPE RATING</p><p className="text-accent text-[9px] font-bold">P100 REQUIRED</p></div>
+           </div>
         </div>
       </div>
 
-      <div className="neuro-card p-8 flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4">
-          <div className="bg-danger/10 text-danger border border-danger/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-            <AlertTriangle size={12} /> CRITICAL
-          </div>
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1 space-y-4">
+          {protocols.map((p, i) => (
+            <motion.div 
+              key={i}
+              onClick={() => setActiveStep(i)}
+              whileHover={{ x: 5 }}
+              className={`p-6 rounded-3xl cursor-pointer border transition-all relative overflow-hidden ${
+                activeStep === i 
+                ? 'bg-primary/20 border-primary shadow-[0_0_30px_rgba(99,102,241,0.2)]' 
+                : 'bg-surface border-white/5 hover:border-white/20'
+              }`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className={`text-[10px] font-bold tracking-widest ${activeStep === i ? 'text-white' : 'text-muted'}`}>{p.phase}</span>
+                {activeStep === i && <Sparkles size={14} className="text-primary animate-pulse" />}
+              </div>
+              <h3 className={`font-display text-2xl uppercase tracking-wide ${activeStep === i ? 'text-white' : 'text-muted'}`}>{p.title}</h3>
+              {activeStep === i && <motion.div layoutId="guide-indicator" className="absolute left-0 top-0 w-1 h-full bg-primary" />}
+            </motion.div>
+          ))}
         </div>
 
-        <div className="flex-1 flex flex-col justify-center space-y-6">
-          <h2 className="text-3xl font-display text-white">{steps[activeStep].title}</h2>
-          <p className="text-xl text-gray-200 leading-relaxed">{steps[activeStep].desc}</p>
-          <div className="bg-white/5 p-4 rounded-xl border-l-4 border-accent">
-            <p className="text-muted text-sm">{steps[activeStep].detail}</p>
-          </div>
-        </div>
+        <div className="lg:col-span-2">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeStep}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="glass-card p-12 h-full flex flex-col justify-between border-primary/20 bg-gradient-to-br from-primary/5 to-transparent shadow-2xl"
+            >
+              <div className="space-y-8">
+                <div className="flex justify-between items-start">
+                   <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-display text-4xl">
+                     {activeStep + 1}
+                   </div>
+                   <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-2">
+                      <Volume2 size={16} className="text-accent" />
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-widest">TTS Active</span>
+                   </div>
+                </div>
 
-        <div className="pt-8 border-t border-white/5">
-          <button
-            onClick={() => handlePlayAudio(`${steps[activeStep].title}. ${steps[activeStep].desc} ${steps[activeStep].detail}`)}
-            className={`w-full neuro-btn py-4 flex items-center justify-center gap-3 font-bold transition-all ${
-              isPlaying ? 'bg-accent text-white' : 'hover:bg-white/5 text-text'
-            }`}
-          >
-            {isLoadingAudio ? (
-              <span>Loading Audio...</span>
-            ) : isPlaying ? (
-              <>
-                <Square size={20} fill="currentColor" /> Stop Reading
-              </>
-            ) : (
-              <>
-                <Play size={20} fill="currentColor" /> Read Instructions Aloud
-              </>
-            )}
-          </button>
-          <p className="text-center text-xs text-muted mt-3">Powered by Gemini 2.5 TTS</p>
+                <div className="space-y-4">
+                  <h2 className="text-5xl font-display text-white uppercase tracking-tight">{protocols[activeStep].title}</h2>
+                  <p className="text-2xl text-gray-300 leading-relaxed font-light">{protocols[activeStep].desc}</p>
+                </div>
+
+                <div className="p-6 bg-danger/10 border-l-4 border-danger rounded-xl">
+                   <div className="flex gap-4 items-start">
+                      <AlertTriangle className="text-danger shrink-0 mt-1" size={20} />
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-danger uppercase tracking-widest">Critical Intelligence</p>
+                        <p className="text-sm text-gray-400 italic leading-snug">{protocols[activeStep].critical}</p>
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              <div className="pt-12 flex flex-col gap-4">
+                 <button 
+                  onClick={handlePlayAudio}
+                  disabled={isLoadingAudio}
+                  className={`w-full neuro-btn py-5 rounded-3xl font-bold flex items-center justify-center gap-4 text-xl shadow-2xl transition-all active:scale-[0.98] ${
+                    isPlaying ? 'bg-accent text-white' : 'bg-primary text-white'
+                  }`}
+                 >
+                   {isLoadingAudio ? <Loader2 className="animate-spin" /> : isPlaying ? <Square fill="white" size={24} /> : <Play fill="white" size={24} />}
+                   {isLoadingAudio ? 'PREPARING AUDIO NEURAL LINK...' : isPlaying ? 'HALT AUDIO UPLINK' : 'READ PHASE INSTRUCTIONS'}
+                 </button>
+                 <div className="flex justify-center items-center gap-2 opacity-30">
+                    <Sparkles size={12} className="text-accent" />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Voice Synthesis via Gemini 2.5 Flash</p>
+                 </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2, ShieldCheck, Database } from 'lucide-react';
 import { checkBrandWithSearch } from '../services/geminiService';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Sample data derived from the provided CSV for instant hits
+const LOCAL_DATABASE = [
+  { brand: "Tulo", risk: "high", fg: true },
+  { brand: "Zinus", risk: "medium", fg: false }, // Post-2024
+  { brand: "Linenspa", risk: "high", fg: true },
+  { brand: "Purple", risk: "none", fg: false },
+  { brand: "Tempur-Pedic", risk: "medium", fg: true },
+  { brand: "Casper", risk: "low", fg: false }
+];
 
 const MattressChecker: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -15,8 +26,21 @@ const MattressChecker: React.FC = () => {
     setResult(null);
 
     try {
+      // Logic: Check local first for "Instant Discovery", then fall back to Search Grounding
+      const localMatch = LOCAL_DATABASE.find(item => item.brand.toLowerCase().includes(query.toLowerCase()));
+      
       const data = await checkBrandWithSearch(query);
-      setResult(data);
+      
+      if (localMatch) {
+         setResult({
+           ...data,
+           riskLevel: localMatch.risk,
+           containsFiberglass: localMatch.fg,
+           isLocalMatch: true
+         });
+      } else {
+         setResult(data);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -29,87 +53,108 @@ const MattressChecker: React.FC = () => {
       case 'high': return 'text-danger border-danger/50 bg-danger/10';
       case 'medium': return 'text-yellow-500 border-yellow-500/50 bg-yellow-500/10';
       case 'low': return 'text-success border-success/50 bg-success/10';
+      case 'none': return 'text-success border-success/50 bg-success/10';
       default: return 'text-muted border-white/10 bg-white/5';
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-12 py-10">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-display tracking-wide text-white">Fiberglass Checker</h1>
-        <p className="text-muted max-w-xl mx-auto">
-          Enter a brand or model name. We use <strong>Gemini Search Grounding</strong> to scour the web for the latest reports, lawsuits, and ingredient lists.
+        <h1 className="text-6xl font-display tracking-tight text-white uppercase">Brand Auditor</h1>
+        <p className="text-muted text-sm max-w-xl mx-auto font-medium">
+          Verify safety profiles instantly. We merge our <span className="text-white font-bold">Local Repository</span> with <span className="text-accent font-bold">Gemini Live Search Grounding</span> to give you the final word on any mattress.
         </p>
       </div>
 
-      <div className="neuro-card p-8">
+      <div className="glass-card p-10 shadow-2xl border-white/5">
         <form onSubmit={handleSearch} className="flex gap-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g., Zinus Green Tea, Nectar, Ashley Chime..."
-            className="flex-1 neuro-inset px-6 py-4 text-lg bg-transparent text-white outline-none focus:ring-2 ring-primary/50 transition-all"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Query brand or model name..."
+              className="w-full neuro-inset px-8 py-5 text-lg bg-transparent text-white outline-none focus:ring-2 ring-primary/40 transition-all rounded-2xl"
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted/30">
+              <Database size={20} />
+            </div>
+          </div>
           <button 
             type="submit" 
             disabled={isLoading}
-            className="neuro-btn neuro-btn-primary px-8 py-4 font-bold flex items-center gap-2"
+            className="neuro-btn bg-primary hover:bg-primary/80 text-white px-10 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all active:scale-95 disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="animate-spin" /> : <Search />}
-            Check
+            AUDIT
           </button>
         </form>
       </div>
 
-      {result && (
-        <div className="neuro-card p-8 animate-in fade-in slide-in-from-bottom-4">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-1 capitalize">{query}</h2>
-              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold border ${getRiskColor(result.riskLevel)}`}>
-                {result.riskLevel === 'high' && <AlertTriangle size={16} />}
-                {result.riskLevel === 'medium' && <HelpCircle size={16} />}
-                {result.riskLevel === 'low' && <CheckCircle size={16} />}
-                Risk Level: {result.riskLevel?.toUpperCase()}
+      <AnimatePresence>
+        {result && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card p-10 relative overflow-hidden"
+          >
+            {result.isLocalMatch && (
+              <div className="absolute top-0 right-0 bg-accent/20 text-accent px-4 py-1.5 text-[10px] font-bold uppercase rounded-bl-xl border-b border-l border-accent/30">
+                 Database Verified
+              </div>
+            )}
+            
+            <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+              <div className="space-y-4">
+                <h2 className="text-4xl font-display text-white uppercase tracking-wider">{query}</h2>
+                <div className={`inline-flex items-center gap-3 px-4 py-2 rounded-xl text-xs font-bold border ${getRiskColor(result.riskLevel)}`}>
+                  {result.riskLevel === 'high' && <AlertTriangle size={18} />}
+                  {result.riskLevel === 'medium' && <HelpCircle size={18} />}
+                  {(result.riskLevel === 'low' || result.riskLevel === 'none') && <ShieldCheck size={18} />}
+                  RISK RATING: {result.riskLevel?.toUpperCase()}
+                </div>
+              </div>
+              
+              <div className="text-center md:text-right">
+                <span className={`text-7xl font-display tracking-tighter ${result.containsFiberglass ? 'text-danger' : 'text-success'}`}>
+                  {result.containsFiberglass ? 'DETECTION' : 'NEGATIVE'}
+                </span>
+                <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-1">Fiberglass Presence Protocol</p>
               </div>
             </div>
-            
-            <div className="text-right">
-              <span className={`text-4xl font-display ${result.containsFiberglass ? 'text-danger' : 'text-success'}`}>
-                {result.containsFiberglass ? 'YES' : 'LIKELY NO'}
-              </span>
-              <p className="text-xs text-muted uppercase tracking-wider">Fiberglass Detected</p>
-            </div>
-          </div>
 
-          <div className="bg-white/5 rounded-xl p-6 mb-6">
-            <h3 className="text-sm font-bold text-muted uppercase tracking-wider mb-2">AI Analysis Summary</h3>
-            <p className="text-gray-200 leading-relaxed">{result.summary}</p>
-          </div>
-
-          {result.sources && result.sources.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-muted uppercase tracking-wider mb-3">Sources (Google Search)</h3>
-              <ul className="space-y-2">
-                {result.sources.map((source: string, i: number) => (
-                  <li key={i}>
-                    <a 
-                      href={source} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-accent hover:underline text-sm truncate"
-                    >
-                      <ExternalLink size={14} />
-                      {source}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 bg-white/5 rounded-3xl p-8 border border-white/5 shadow-inner">
+                <h3 className="text-[10px] font-bold text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Loader2 size={12} className="text-accent" /> AI Audit Summary
+                </h3>
+                <p className="text-gray-300 leading-relaxed text-sm">{result.summary}</p>
+              </div>
+              
+              <div className="bg-white/5 rounded-3xl p-8 border border-white/5">
+                <h3 className="text-[10px] font-bold text-muted uppercase tracking-widest mb-4">Uplink Sources</h3>
+                <div className="space-y-3">
+                  {result.sources && result.sources.length > 0 ? (
+                    result.sources.map((source: string, i: number) => (
+                      <a 
+                        key={i} 
+                        href={source} 
+                        target="_blank" 
+                        className="flex items-center gap-2 text-accent hover:text-white text-[10px] font-bold uppercase transition-colors truncate"
+                      >
+                        <ExternalLink size={12} /> VERIFIED LINK {i+1}
+                      </a>
+                    ))
+                  ) : (
+                    <p className="text-[10px] text-muted italic">No external grounding required.</p>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

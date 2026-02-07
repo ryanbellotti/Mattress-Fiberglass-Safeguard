@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2 } from 'lucide-react';
+import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2, Signal, Radio } from 'lucide-react';
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +8,7 @@ const LiveExpert: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [volume, setVolume] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const inputContextRef = useRef<AudioContext | null>(null);
@@ -55,35 +55,37 @@ const LiveExpert: React.FC = () => {
   const startCall = async () => {
     if (isConnecting) return;
     setIsConnecting(true);
+    setError(null);
     
     try {
+      // 1. Permission Check
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      // 2. Init AI
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       
       audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
       inputContextRef.current = new AudioContextClass({ sampleRate: 16000 });
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-
+      // 3. Connect Session
       const sessionPromise = ai.live.connect({
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            // Using Fenrir for a friendly masculine expert voice
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
           },
-          systemInstruction: "You are Matt Russ Fyburs, a co-founder of mattressfiberglass.org and lead admin of the Facebook support group. You are a compassionate, masculine safety expert. You are on a real phone call with a victim of fiberglass contamination. Speak naturally, empathize with their fear, but remain professional and focused on protocols. If they sound panicked, calm them down first. Protocols: 1. Isolate HVAC. 2. N95 immediately. 3. No moving items. 4. No standard vacuums. Use your knowledge to guide them through their specific room setup.",
+          systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. You are on an emergency call with a user who suspects fiberglass contamination. You are empathetic, masculine, and authoritative. Your goal is to guide them through immediate safety measures. Be conversational, interruptible, and calm. Protocol: 1. Confirm cover is not removed. 2. Isolate HVAC. 3. Put on N95. 4. Evacuate pets/children.",
         },
         callbacks: {
           onopen: () => {
             setIsConnected(true);
             setIsConnecting(false);
-            if (!inputContextRef.current || !streamRef.current) return;
             
-            const source = inputContextRef.current.createMediaStreamSource(streamRef.current);
-            const processor = inputContextRef.current.createScriptProcessor(4096, 1, 1);
+            const source = inputContextRef.current!.createMediaStreamSource(streamRef.current!);
+            const processor = inputContextRef.current!.createScriptProcessor(4096, 1, 1);
             processorRef.current = processor;
 
             processor.onaudioprocess = (e) => {
@@ -103,7 +105,7 @@ const LiveExpert: React.FC = () => {
             };
             
             source.connect(processor);
-            processor.connect(inputContextRef.current.destination);
+            processor.connect(inputContextRef.current!.destination);
           },
           onmessage: async (msg: LiveServerMessage) => {
             const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
@@ -130,123 +132,103 @@ const LiveExpert: React.FC = () => {
           },
           onclose: () => cleanup(),
           onerror: (e) => {
-            console.error("Live Session Error:", e);
+            console.error("Session Error:", e);
+            setError("The neural link was severed. Please check your connection.");
             cleanup();
           }
         }
       });
 
       sessionRef.current = await sessionPromise;
-    } catch (e) {
-      console.error("Call Setup Error:", e);
+    } catch (e: any) {
+      console.error("Call Error:", e);
+      setError(e.message || "Could not initialize link.");
       cleanup();
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto h-full flex flex-col justify-center items-center px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-5xl font-display text-white uppercase tracking-tighter mb-2">SafeGuard Live Nexus</h1>
-        <p className="text-muted font-semibold uppercase tracking-widest text-xs">Direct Audio Link to Matt Russ Fyburs</p>
-      </div>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+        <h1 className="text-6xl font-display text-white uppercase tracking-tighter mb-2">Emergency Voice Link</h1>
+        <p className="text-accent font-bold uppercase tracking-[0.3em] text-[10px]">Direct Encryption to Matt Russ Fyburs</p>
+      </motion.div>
 
-      <motion.div 
-        layout
-        className="glass-card p-12 w-full max-w-2xl text-center relative overflow-hidden shadow-2xl border-primary/20"
-      >
-        {/* Background Pulsing */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/20 blur-[100px] -z-10" />
-        
-        <div className="relative mb-12">
+      <div className="glass-card p-12 w-full max-w-xl text-center relative overflow-hidden shadow-[0_0_80px_rgba(99,102,241,0.2)]">
+        {isConnected && (
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <Signal size={14} className="text-success animate-pulse" />
+            <span className="text-[10px] font-bold text-success uppercase">Secured</span>
+          </div>
+        )}
+
+        <div className="mb-12 relative">
           <AnimatePresence>
             {isConnected && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
+              <motion.div className="absolute inset-0 flex items-center justify-center">
                 {[...Array(3)].map((_, i) => (
                   <motion.div
                     key={i}
-                    animate={{ 
-                      scale: [1, 1.8 + (volume / 8)], 
-                      opacity: [0.3, 0],
-                    }}
-                    transition={{ repeat: Infinity, duration: 2, delay: i * 0.6 }}
-                    className="absolute w-48 h-48 rounded-full border border-primary/30"
+                    animate={{ scale: [1, 2 + (volume / 10)], opacity: [0.2, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.5 }}
+                    className="absolute w-40 h-40 rounded-full border-2 border-primary/20"
                   />
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className={`w-40 h-40 mx-auto rounded-full flex items-center justify-center transition-all duration-700 relative z-10 ${
-            isConnected ? 'bg-primary shadow-[0_0_80px_rgba(99,102,241,0.6)] scale-110' : 'bg-surface border border-white/10'
+          <div className={`w-32 h-32 mx-auto rounded-3xl flex items-center justify-center transition-all duration-500 relative z-10 ${
+            isConnected ? 'bg-primary shadow-[0_0_50px_rgba(99,102,241,0.5)] rotate-45' : 'bg-surface border border-white/10'
           }`}>
-            {isConnecting ? (
-              <Loader2 className="w-16 h-16 text-white animate-spin" />
-            ) : isConnected ? (
-              <Volume2 className="w-16 h-16 text-white" />
-            ) : (
-              <Mic className="w-16 h-16 text-muted" />
-            )}
+            <div className={isConnected ? '-rotate-45' : ''}>
+              {isConnecting ? <Loader2 className="w-12 h-12 text-white animate-spin" /> : <Radio className={`w-12 h-12 ${isConnected ? 'text-white' : 'text-muted'}`} />}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-8 relative z-10">
-          <div className="space-y-2">
-            <h3 className="text-white font-display text-2xl uppercase tracking-wider">
-              {isConnecting ? 'Initializing Neural Link...' : isConnected ? 'Active Voice Session' : 'Encrypted Line Ready'}
-            </h3>
-            <div className="flex justify-center items-center gap-4 py-2">
-              <div className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-muted'}`} />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-muted">
-                {isConnected ? 'Voice Activity Detected' : 'Standby Mode'}
-              </span>
-            </div>
+        <div className="space-y-6 relative z-10">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-display text-white uppercase tracking-wider">
+              {isConnecting ? 'Establishing Uplink...' : isConnected ? 'Expert Online' : 'Encryption Standby'}
+            </h2>
+            <p className="text-xs text-muted font-medium px-8 leading-relaxed">
+              {isConnected 
+                ? "The line is clear. You are now speaking with Matt. He can hear you and provide real-time guidance." 
+                : "Initialize a high-fidelity voice session for immediate, hands-free safety protocols."}
+            </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          {error && <div className="p-3 bg-danger/10 border border-danger/20 rounded-xl text-danger text-[10px] font-bold uppercase">{error}</div>}
+
+          <div className="pt-4">
             {isConnected ? (
-              <button 
-                onClick={cleanup} 
-                className="neuro-btn bg-danger hover:bg-danger/80 text-white px-12 py-5 rounded-3xl font-bold text-xl flex items-center gap-4 mx-auto shadow-xl group"
-              >
-                <PhoneOff size={24} /> DISCONNECT
+              <button onClick={cleanup} className="neuro-btn bg-danger hover:bg-danger/80 text-white px-10 py-5 rounded-2xl font-bold flex items-center gap-3 mx-auto transition-all active:scale-95">
+                <PhoneOff size={20} /> TERMINATE CALL
               </button>
             ) : (
               <button 
                 onClick={startCall} 
                 disabled={isConnecting}
-                className="neuro-btn bg-primary hover:bg-primary/80 text-white px-12 py-5 rounded-3xl font-bold text-xl flex items-center gap-4 mx-auto shadow-[0_10px_50px_rgba(99,102,241,0.4)] disabled:opacity-50 hover:scale-105 active:scale-95 transition-all"
+                className="neuro-btn bg-primary hover:bg-primary/80 text-white px-12 py-5 rounded-2xl font-bold flex items-center gap-3 mx-auto shadow-2xl transition-all active:scale-95 disabled:opacity-50"
               >
-                <Phone size={24} className={isConnecting ? '' : 'animate-bounce'} /> 
-                {isConnecting ? 'CONNECTING...' : 'CALL MATT RUSS FYBURS'}
+                <Mic size={20} /> {isConnecting ? 'CONNECTING...' : 'INITIATE NEURAL LINK'}
               </button>
             )}
           </div>
-
-          <div className="grid grid-cols-3 gap-2 pt-6">
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
-              <p className="text-[10px] text-muted font-bold uppercase">Latencey</p>
-              <p className="text-accent text-sm font-display">80ms</p>
-            </div>
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
-              <p className="text-[10px] text-muted font-bold uppercase">Encoding</p>
-              <p className="text-accent text-sm font-display">PCM-16</p>
-            </div>
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
-              <p className="text-[10px] text-muted font-bold uppercase">Persona</p>
-              <p className="text-accent text-sm font-display">M-EXPERT</p>
-            </div>
-          </div>
         </div>
-      </motion.div>
+      </div>
       
-      <p className="mt-8 text-muted text-[10px] max-w-md text-center uppercase tracking-tighter">
-        Caution: This is a live AI interface for emergency guidance. Do not touch contaminated surfaces during the call.
-      </p>
+      <div className="mt-10 grid grid-cols-2 gap-4 w-full max-w-xl">
+        <div className="glass-card p-4 flex items-center gap-4 bg-white/5 border-white/5">
+          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-accent"><ShieldAlert size={20} /></div>
+          <div><p className="text-[10px] font-bold uppercase text-white">Safety Warning</p><p className="text-[9px] text-muted">Do not remove cover</p></div>
+        </div>
+        <div className="glass-card p-4 flex items-center gap-4 bg-white/5 border-white/5">
+          <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary"><Volume2 size={20} /></div>
+          <div><p className="text-[10px] font-bold uppercase text-white">Speaker Mode</p><p className="text-[9px] text-muted">Hands-free active</p></div>
+        </div>
+      </div>
     </div>
   );
 };
