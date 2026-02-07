@@ -1,0 +1,8 @@
+{
+  "name": "Mattress Fiberglass SafeGuard",
+  "description": "AI-powered assistant for mattress fiberglass detection, safety, and remediation.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
