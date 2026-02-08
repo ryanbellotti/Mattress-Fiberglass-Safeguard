@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap, ExternalLink, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getAssessment } from '../services/apiService';
 
 const MotionDiv = motion.div as any;
 
@@ -9,8 +10,25 @@ const Dashboard: React.FC = () => {
   const [assessment, setAssessment] = useState<any>(null);
   
   useEffect(() => {
-    const data = localStorage.getItem('safeguard_assessment');
-    if (data) setAssessment(JSON.parse(data));
+    const loadAssessment = async () => {
+      const userId = localStorage.getItem('user_id');
+      if (userId) {
+        try {
+          const data = await getAssessment(userId);
+          if (data) setAssessment(data);
+        } catch (error) {
+           console.error("Failed to load assessment from backend", error);
+           // Fallback to local storage
+           const localData = localStorage.getItem('safeguard_assessment');
+           if (localData) setAssessment(JSON.parse(localData));
+        }
+      } else {
+        // Legacy fallback
+        const localData = localStorage.getItem('safeguard_assessment');
+        if (localData) setAssessment(JSON.parse(localData));
+      }
+    };
+    loadAssessment();
   }, []);
 
   const getSeverityColor = (s: string) => {
