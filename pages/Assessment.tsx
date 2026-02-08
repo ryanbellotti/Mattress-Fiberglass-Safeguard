@@ -44,8 +44,6 @@ const Assessment: React.FC = () => {
   const runNeuralDiagnostic = async () => {
     setIsAnalyzing(true);
     try {
-      // We simulate sending the data to Gemini for a "Deep Reasoning" plan
-      // In a real hackathon project, this is where we leverage Gemini 3 Pro
       const prompt = `Analyze this mattress fiberglass exposure case:
       User: ${formData.name} in ${formData.location}
       Mattress: ${formData.brand} ${formData.model}
@@ -56,13 +54,30 @@ const Assessment: React.FC = () => {
       
       Provide a Severity (Low, Medium, High, Extreme) and a 4-step remediation protocol.`;
 
-      // Reusing analyzeSafetyMedia logic but for text-based diagnostic summary
-      const response = await analyzeSafetyMedia("", "image/png", prompt); // Just using the service wrapper logic
+      const response = await analyzeSafetyMedia("", "image/png", prompt);
       setAiResult(response);
+      
+      // PERSIST DATA FOR DASHBOARD
+      const assessmentData = {
+        date: new Date().toISOString(),
+        data: formData,
+        result: response,
+        status: 'Complete'
+      };
+      localStorage.setItem('safeguard_assessment', JSON.stringify(assessmentData));
+      
       setStep(4);
     } catch (e) {
       console.error(e);
-      setStep(4); // Fallback to basic results if AI fails
+      // Fallback save even on error for demo purposes
+      const fallbackData = {
+        date: new Date().toISOString(),
+        data: formData,
+        result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"] },
+        status: 'Complete'
+      };
+      localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));
+      setStep(4);
     } finally {
       setIsAnalyzing(false);
     }
