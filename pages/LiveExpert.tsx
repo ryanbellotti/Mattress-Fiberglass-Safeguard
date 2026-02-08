@@ -17,7 +17,7 @@ const LiveExpert: React.FC = () => {
   const nextStartTimeRef = useRef<number>(0);
   const sessionRef = useRef<any>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const processorRef = useRef<AudioWorkletNode | null>(null);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
   const cleanup = () => {
@@ -86,28 +86,28 @@ const LiveExpert: React.FC = () => {
             setIsConnected(true);
             setIsConnecting(false);
             
-            const source = inputContextRef.current!.createMediaStreamSource(streamRef.current!);
-            const processor = inputContextRef.current!.createScriptProcessor(4096, 1, 1);
-            processorRef.current = processor;
+            // Load Audio Worklet
+            inputContextRef.current!.audioWorklet.addModule('/audio-processor.js').then(() => {
+              const source = inputContextRef.current!.createMediaStreamSource(streamRef.current!);
+              const processor = new AudioWorkletNode(inputContextRef.current!, 'audio-processor');
+              processorRef.current = processor;
 
-            processor.onaudioprocess = (e) => {
-              const inputData = e.inputBuffer.getChannelData(0);
-              let sum = 0;
-              for(let i=0; i<inputData.length; i++) sum += Math.abs(inputData[i]);
-              setVolume((sum / inputData.length) * 100);
+              processor.port.onmessage = (e) => {
+                const { volume, pcmBuffer } = e.data;
+                setVolume(volume);
 
-              const pcm16 = float32To16BitPCM(inputData);
-              const base64 = arrayBufferToBase64(pcm16.buffer);
-              
-              sessionPromise.then(session => {
-                session.sendRealtimeInput({
-                  media: { mimeType: 'audio/pcm;rate=16000', data: base64 }
+                const base64 = arrayBufferToBase64(pcmBuffer);
+
+                sessionPromise.then(session => {
+                  session.sendRealtimeInput({
+                    media: { mimeType: 'audio/pcm;rate=16000', data: base64 }
+                  });
                 });
-              });
-            };
-            
-            source.connect(processor);
-            processor.connect(inputContextRef.current!.destination);
+              };
+
+              source.connect(processor);
+              processor.connect(inputContextRef.current!.destination);
+            }).catch(err => console.error('Failed to load audio processor:', err));
           },
           onmessage: async (msg: LiveServerMessage) => {
             const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
