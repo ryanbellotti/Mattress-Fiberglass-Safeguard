@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2, Signal, Radio } from 'lucide-react';
-import { GoogleGenAI, LiveServerMessage, Modality } from "@google/generative-ai";
+import { GoogleGenerativeAI, LiveServerMessage, Modality } from "@google/generative-ai";
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -63,7 +63,7 @@ const LiveExpert: React.FC = () => {
       streamRef.current = stream;
 
       // 2. Init AI
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenerativeAI({ apiKey: process.env.API_KEY });
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       
       audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
