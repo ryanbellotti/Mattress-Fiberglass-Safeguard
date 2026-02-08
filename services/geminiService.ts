@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { GoogleGenAI, LiveServerMessage, Modality } from "@google/generative-ai";
 
 // Advanced Chat with Thinking & Search
 export const sendAdvancedChatMessage = async (
