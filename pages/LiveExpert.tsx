@@ -65,7 +65,11 @@ const LiveExpert: React.FC = () => {
       streamRef.current = stream;
 
       // 2. Init AI
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: 'proxy-key',
+        baseURL: window.location.origin + '/api/gemini'
+      });
+
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       
       audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
