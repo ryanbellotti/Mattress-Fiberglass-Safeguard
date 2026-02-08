@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, AlertTriangle, Shield, CheckCircle2, User, MapPin, Activity, ClipboardList, Loader2, Sparkles } from 'lucide-react';
 import { analyzeSafetyMedia } from '../services/geminiService';
+import { saveAssessment } from '../services/apiService';
 import { useNavigate } from 'react-router-dom';
 
 const MotionDiv = motion.div as any;
@@ -45,6 +46,12 @@ const Assessment: React.FC = () => {
 
   const runNeuralDiagnostic = async () => {
     setIsAnalyzing(true);
+    let userId = localStorage.getItem('user_id');
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem('user_id', userId);
+    }
+
     try {
       const prompt = `Analyze this mattress fiberglass exposure case:
       User: ${formData.name} in ${formData.location}
@@ -66,7 +73,8 @@ const Assessment: React.FC = () => {
         result: response,
         status: 'Complete'
       };
-      localStorage.setItem('safeguard_assessment', JSON.stringify(assessmentData));
+
+      await saveAssessment(userId, assessmentData);
       
       setStep(4);
     } catch (e) {
@@ -78,7 +86,14 @@ const Assessment: React.FC = () => {
         result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"] },
         status: 'Complete'
       };
-      localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));
+
+      try {
+        await saveAssessment(userId!, fallbackData);
+      } catch (saveError) {
+        console.error("Failed to save fallback assessment", saveError);
+        localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));
+      }
+
       setStep(4);
     } finally {
       setIsAnalyzing(false);
