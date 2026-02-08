@@ -73,20 +73,25 @@ export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, p
 // High-Res Image Generation
 export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | "4K") => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-image-preview',
-    contents: { parts: [{ text: prompt }] },
-    config: {
-      imageConfig: { aspectRatio: "1:1", imageSize: size }
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: { parts: [{ text: prompt }] },
+      config: {
+        imageConfig: { aspectRatio: "1:1", imageSize: size }
+      }
+    });
+
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+      }
     }
-  });
-  
-  if (response.candidates?.[0]?.content?.parts) {
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
-    }
+    return null;
+  } catch (error) {
+    console.error("Image Generation Error:", error);
+    return null;
   }
-  return null;
 };
 
 // Added: Search-grounded brand auditor for MattressChecker.tsx
