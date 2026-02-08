@@ -4,7 +4,7 @@ import { GoogleGenerativeAI, LiveServerMessage, Modality } from "@google/generat
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LiveExpert: React.FC = () => {
+const LiveExpert; React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [volume, setVolume] = useState(0);
