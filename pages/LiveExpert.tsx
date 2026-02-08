@@ -63,7 +63,7 @@ const LiveExpert; React.FC = () => {
       streamRef.current = stream;
 
       // 2. Init AI
-      const ai = new GoogleGenerativeAI({ apiKey: process.env.API_KEY });
+     const ai = new GoogleGenerativeAI({ apiKey: process.env.API_KEY });
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       
       audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
@@ -75,7 +75,7 @@ const LiveExpert; React.FC = () => {
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Enclaudius' } },
           },
           systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. You are on an emergency call with a user who suspects fiberglass contamination. You are empathetic, masculine, and authoritative. Your goal is to guide them through immediate safety measures. Be conversational, interruptible, and calm. Protocol: 1. Confirm cover is not removed. 2. Isolate HVAC. 3. Put on N95. 4. Evacuate pets/children.",
         },
