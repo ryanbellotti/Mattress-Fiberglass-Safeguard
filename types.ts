@@ -29,3 +29,20 @@ export interface CleanupStep {
   description: string;
   isCompleted: boolean;
 }
+export interface AssessmentData {
+  name: string;
+  location: string;
+  brand: string;
+  model: string;
+  coverRemoved: boolean;
+  visibleFibers: boolean;
+  symptoms: string[];
+  areas: string[];
+}
+
+export interface AssessmentResult {
+  severity: 'low' | 'medium' | 'high' | 'extreme';
+  remediationPlan: string[];
+  detections?: string[];
+  summary?: string;
+}

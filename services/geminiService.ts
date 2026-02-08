@@ -1,3 +1,4 @@
+import type { AssessmentData, AssessmentResult } from '../types.ts';
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 
@@ -148,5 +149,48 @@ export const generateSpeech = async (text: string) => {
   } catch (error) {
     console.error("Speech Synthesis Error:", error);
     return null;
+  }
+};
+
+export const analyzeFiberglassExposure = async (data: AssessmentData): Promise<AssessmentResult> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `Analyze this mattress fiberglass exposure case:
+      User: ${data.name} in ${data.location}
+      Mattress: ${data.brand} ${data.model}
+      Cover Removed: ${data.coverRemoved ? 'YES (HIGH RISK)' : 'NO'}
+      Visible Fibers: ${data.visibleFibers ? 'YES' : 'NO'}
+      Symptoms: ${data.symptoms.join(', ')}
+      Impact Areas: ${data.areas.join(', ')}
+
+      Provide a Severity (Low, Medium, High, Extreme) and a 4-step remediation protocol.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: {
+        parts: [{ text: prompt }]
+      },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            severity: { type: Type.STRING, enum: ["low", "medium", "high", "extreme"] },
+            detections: { type: Type.ARRAY, items: { type: Type.STRING } },
+            remediationPlan: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "Step-by-step safety plan based on the items seen in the room (e.g., carpets, electronics)."
+            },
+            summary: { type: Type.STRING }
+          },
+          required: ["severity", "remediationPlan"]
+        }
+      }
+    });
+    return JSON.parse(response.text || "{}") as AssessmentResult;
+  } catch (error) {
+    console.error("Analysis Error:", error);
+    throw error;
   }
 };
