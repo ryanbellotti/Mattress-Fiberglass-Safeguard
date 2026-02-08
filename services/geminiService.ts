@@ -1,5 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { SYSTEM_INSTRUCTIONS } from '../constants/prompts';
 
 // Advanced Chat with Thinking & Search
 export const sendAdvancedChatMessage = async (
@@ -18,7 +19,7 @@ export const sendAdvancedChatMessage = async (
       config: {
         thinkingConfig: { thinkingBudget: 32768 },
         tools: [{ googleSearch: {} }],
-        systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. You are a highly technical but empathetic safety expert. Use Google Search to find the latest recalls or lawsuits. When you use search, always provide the URLs. You use your 'Thinking' capability to analyze complex cross-contamination scenarios.",
+        systemInstruction: SYSTEM_INSTRUCTIONS.CHAT_EXPERT,
       }
     });
     
@@ -101,7 +102,7 @@ export const checkBrandWithSearch = async (brandName: string) => {
       Provide a concise summary of findings including recall status or known class action lawsuits.`,
       config: {
         tools: [{ googleSearch: {} }],
-        systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. Use precise technical safety data."
+        systemInstruction: SYSTEM_INSTRUCTIONS.BRAND_AUDIT
       }
     });
 
