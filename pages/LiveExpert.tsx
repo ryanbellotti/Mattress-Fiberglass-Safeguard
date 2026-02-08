@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2, Signal, Radio } from 'lucide-react';
-import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
+import { GoogleGenAI, LiveServerMessage, Modality } from "@google/generative-ai": "0.21.0"; 
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
