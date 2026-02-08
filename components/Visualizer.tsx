@@ -3,6 +3,8 @@ import { Camera, Video, Upload, Check, AlertTriangle, Loader2, PlayCircle, Shiel
 import { analyzeSafetyMedia } from '../services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const MotionDiv = motion.div as any;
+
 const Visualizer: React.FC = () => {
   const [media, setMedia] = useState<{url: string, type: string, base64: string} | null>(null);
   const [analysis, setAnalysis] = useState<any>(null);
@@ -147,7 +149,7 @@ const Visualizer: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               className="neuro-btn py-4 text-xs font-bold text-white flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10"
             >
-              <Upload size={16} /> UPLOAD MEDIA
+              <Upload size={16} /> UPLOAD PHOTO OR VIDEO
             </button>
           </div>
         </div>
@@ -155,20 +157,20 @@ const Visualizer: React.FC = () => {
         <div className="space-y-6">
           <AnimatePresence mode="wait">
             {!media && !isCameraOpen ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card opacity-40 grayscale">
+              <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card opacity-40 grayscale">
                 <ShieldCheck size={64} className="mb-4 text-muted" />
                 <p className="text-sm font-bold uppercase tracking-widest">Waiting for Input Data</p>
-              </motion.div>
+              </MotionDiv>
             ) : isAnalyzing ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card">
+              <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card">
                 <Loader2 className="animate-spin text-primary mb-6" size={48} />
                 <div className="space-y-2">
                   <p className="text-xl font-display text-white uppercase tracking-wider animate-pulse">Processing Multi-Modal Data</p>
                   <p className="text-xs text-muted font-bold uppercase tracking-tighter">Gemini 3 Pro Analysing Frame Sequence...</p>
                 </div>
-              </motion.div>
+              </MotionDiv>
             ) : analysis && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+              <MotionDiv initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
                 <div className={`p-6 rounded-3xl border-2 flex items-center gap-6 ${
                   analysis.severity === 'extreme' || analysis.severity === 'high' ? 'bg-danger/10 border-danger shadow-[0_0_40px_rgba(244,63,94,0.2)]' : 'bg-primary/10 border-primary/40'
                 }`}>
@@ -209,7 +211,7 @@ const Visualizer: React.FC = () => {
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                   <p className="text-xs text-gray-400 italic">"Summary: {analysis.summary}"</p>
                 </div>
-              </motion.div>
+              </MotionDiv>
             )}
           </AnimatePresence>
         </div>

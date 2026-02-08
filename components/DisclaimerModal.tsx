@@ -2,6 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, CheckCircle2, AlertTriangle, Cpu } from 'lucide-react';
 
+const MotionDiv = motion.div as any;
+
 interface DisclaimerModalProps {
   isOpen: boolean;
   onAccept: () => void;
@@ -12,14 +14,14 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onAccept }) =
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-background/90 backdrop-blur-xl"
           />
           
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -69,7 +71,7 @@ const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ isOpen, onAccept }) =
                 </button>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       )}
     </AnimatePresence>

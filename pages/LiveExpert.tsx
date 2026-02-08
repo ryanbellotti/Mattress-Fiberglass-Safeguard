@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2, Signal, Radio } from 'lucide-react';
-import { GoogleGenerativeAI, LiveServerMessage, Modality } from "@google/generative-ai";
+import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LiveExpert; React.FC = () => {
+const MotionDiv = motion.div as any;
+
+const LiveExpert: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [volume, setVolume] = useState(0);
@@ -63,7 +65,7 @@ const LiveExpert; React.FC = () => {
       streamRef.current = stream;
 
       // 2. Init AI
-     const ai = new GoogleGenerativeAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       
       audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
@@ -75,7 +77,7 @@ const LiveExpert; React.FC = () => {
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Enclaudius' } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
           },
           systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. You are on an emergency call with a user who suspects fiberglass contamination. You are empathetic, masculine, and authoritative. Your goal is to guide them through immediate safety measures. Be conversational, interruptible, and calm. Protocol: 1. Confirm cover is not removed. 2. Isolate HVAC. 3. Put on N95. 4. Evacuate pets/children.",
         },
@@ -149,10 +151,10 @@ const LiveExpert; React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto h-full flex flex-col justify-center items-center px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+      <MotionDiv initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
         <h1 className="text-6xl font-display text-white uppercase tracking-tighter mb-2">Emergency Voice Link</h1>
         <p className="text-accent font-bold uppercase tracking-[0.3em] text-[10px]">Direct Encryption to Matt Russ Fyburs</p>
-      </motion.div>
+      </MotionDiv>
 
       <div className="glass-card p-12 w-full max-w-xl text-center relative overflow-hidden shadow-[0_0_80px_rgba(99,102,241,0.2)]">
         {isConnected && (
@@ -165,16 +167,16 @@ const LiveExpert; React.FC = () => {
         <div className="mb-12 relative">
           <AnimatePresence>
             {isConnected && (
-              <motion.div className="absolute inset-0 flex items-center justify-center">
+              <MotionDiv className="absolute inset-0 flex items-center justify-center">
                 {[...Array(3)].map((_, i) => (
-                  <motion.div
+                  <MotionDiv
                     key={i}
                     animate={{ scale: [1, 2 + (volume / 10)], opacity: [0.2, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.5 }}
                     className="absolute w-40 h-40 rounded-full border-2 border-primary/20"
                   />
                 ))}
-              </motion.div>
+              </MotionDiv>
             )}
           </AnimatePresence>
 

@@ -3,6 +3,8 @@ import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2, 
 import { checkBrandWithSearch } from '../services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const MotionDiv = motion.div as any;
+
 // Sample data derived from the provided CSV for instant hits
 const LOCAL_DATABASE = [
   { brand: "Tulo", risk: "high", fg: true },
@@ -94,7 +96,7 @@ const MattressChecker: React.FC = () => {
 
       <AnimatePresence>
         {result && (
-          <motion.div 
+          <MotionDiv 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }}
             className="glass-card p-10 relative overflow-hidden"
@@ -152,7 +154,7 @@ const MattressChecker: React.FC = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
     </div>

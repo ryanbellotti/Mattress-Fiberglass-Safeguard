@@ -4,6 +4,8 @@ import { generateSpeech } from '../services/geminiService';
 import { base64ToUint8Array, decodeAudioData } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const MotionDiv = motion.div as any;
+
 const protocols = [
   {
     phase: "PHASE 01",
@@ -100,7 +102,7 @@ const CleanupGuide: React.FC = () => {
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-4">
           {protocols.map((p, i) => (
-            <motion.div 
+            <MotionDiv 
               key={i}
               onClick={() => setActiveStep(i)}
               whileHover={{ x: 5 }}
@@ -115,14 +117,14 @@ const CleanupGuide: React.FC = () => {
                 {activeStep === i && <Sparkles size={14} className="text-primary animate-pulse" />}
               </div>
               <h3 className={`font-display text-2xl uppercase tracking-wide ${activeStep === i ? 'text-white' : 'text-muted'}`}>{p.title}</h3>
-              {activeStep === i && <motion.div layoutId="guide-indicator" className="absolute left-0 top-0 w-1 h-full bg-primary" />}
-            </motion.div>
+              {activeStep === i && <MotionDiv layoutId="guide-indicator" className="absolute left-0 top-0 w-1 h-full bg-primary" />}
+            </MotionDiv>
           ))}
         </div>
 
         <div className="lg:col-span-2">
           <AnimatePresence mode="wait">
-            <motion.div 
+            <MotionDiv 
               key={activeStep}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -172,7 +174,7 @@ const CleanupGuide: React.FC = () => {
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Voice Synthesis via Gemini 2.5 Flash</p>
                  </div>
               </div>
-            </motion.div>
+            </MotionDiv>
           </AnimatePresence>
         </div>
       </div>

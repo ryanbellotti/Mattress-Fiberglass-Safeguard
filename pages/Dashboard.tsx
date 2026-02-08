@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap, ExternalLink, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const MotionDiv = motion.div as any;
 
 const Dashboard: React.FC = () => {
   const [assessment, setAssessment] = useState<any>(null);
@@ -19,17 +21,39 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getProgress = () => {
-    // 16 completed steps out of ~25 is approx 64%. 
-    // If we want to display "16 Steps", we calculate percentage.
-    // The prompt asked for "160%" which is likely "16" steps. I will display 16 Steps / 64%.
-    return 64; 
-  };
+  const RESOURCES = [
+    {
+      category: "Official Information",
+      links: [
+        { label: "Mattress Fiberglass Org", url: "https://mattressfiberglass.org", sub: "Main Website" },
+        { label: "CA Dept Public Health", url: "https://cdph.ca.gov", sub: "Fact Sheet" },
+        { label: "NIH Research", url: "https://nih.gov", sub: "Science" }
+      ]
+    },
+    {
+      category: "Safety & ID",
+      links: [
+        { label: "Fiberglass-Free Brands", url: "#", sub: "Safe List" },
+        { label: "Sleep Advisor Guide", url: "https://sleepadvisor.org", sub: "Identification" },
+        { label: "Poison Control", url: "https://poison.org", sub: "Expert Info" }
+      ]
+    },
+    {
+      category: "Community & Reporting",
+      links: [
+        { label: "Facebook Support Group", url: "#", sub: "Join Community" },
+        { label: "SaferProducts.gov", url: "https://saferproducts.gov", sub: "Report Incident" }
+      ]
+    }
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
       <div className="flex justify-between items-end">
-        <h1 className="text-4xl font-display tracking-wide text-white uppercase">My Command Center</h1>
+        <div>
+          <h1 className="text-4xl font-display tracking-wide text-white uppercase">My Command Center</h1>
+          <p className="text-muted text-sm mt-1">Welcome back{assessment?.data?.name ? `, ${assessment.data.name}` : ''}</p>
+        </div>
         <p className="text-xs font-bold text-muted uppercase tracking-widest">Case ID: {assessment ? '883-XC' : 'N/A'}</p>
       </div>
 
@@ -46,93 +70,133 @@ const Dashboard: React.FC = () => {
         <>
           {/* Top Stats Row */}
           <div className="grid md:grid-cols-4 gap-6">
-             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-card p-6 border-l-4 border-primary">
+             <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-card p-6 border-l-4 border-primary relative overflow-hidden group">
+                <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                   <Shield size={64} />
+                </div>
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Current Status</p>
                 <p className="text-xl font-display text-white uppercase">Assessment Complete</p>
-                <p className="text-xs text-gray-400 mt-1">Contamination level determined</p>
-             </motion.div>
+                <div className="flex items-center gap-2 mt-2">
+                  <CheckCircle size={14} className="text-primary" />
+                  <p className="text-xs text-gray-300">Analysis Finalized</p>
+                </div>
+             </MotionDiv>
              
-             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-6 border-l-4 border-accent">
+             <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-6 border-l-4 border-accent relative overflow-hidden">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Overall Progress</p>
-                <div className="flex items-end gap-2">
+                <div className="flex items-end gap-2 relative z-10">
                    <p className="text-4xl font-display text-accent">16</p>
-                   <p className="text-xs font-bold text-accent mb-1 uppercase">Steps Done</p>
+                   <p className="text-xs font-bold text-accent mb-1 uppercase">Steps Completed</p>
                 </div>
-                <div className="w-full h-1.5 bg-white/10 rounded-full mt-3 overflow-hidden">
-                   <div className="h-full bg-accent w-[64%]" />
+                <div className="w-full h-2 bg-white/10 rounded-full mt-3 overflow-hidden">
+                   <MotionDiv 
+                     initial={{ width: 0 }}
+                     animate={{ width: "64%" }}
+                     transition={{ duration: 1, delay: 0.5 }}
+                     className="h-full bg-accent relative"
+                   >
+                      <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 animate-pulse" />
+                   </MotionDiv>
                 </div>
-             </motion.div>
+                <p className="text-[9px] text-right mt-1 text-muted">64% TOTAL COMPLETION</p>
+             </MotionDiv>
 
-             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card p-6 border-l-4 border-danger">
+             <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card p-6 border-l-4 border-danger">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Contamination Level</p>
                 <p className={`text-4xl font-display uppercase ${getSeverityColor(assessment.result?.severity)}`}>
                   {assessment.result?.severity || 'MODERATE'}
                 </p>
-             </motion.div>
+             </MotionDiv>
 
-             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="glass-card p-6 border-l-4 border-secondary">
+             <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="glass-card p-6 border-l-4 border-secondary">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Assessment Date</p>
                 <p className="text-2xl font-display text-white uppercase">{new Date(assessment.date).toLocaleDateString()}</p>
-             </motion.div>
+                <p className="text-xs text-gray-400 mt-1">Protocol v3.1 Active</p>
+             </MotionDiv>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-             {/* Personalized Tips */}
+             {/* Main Content */}
              <div className="lg:col-span-2 space-y-8">
+                {/* Personalized Tips */}
                 <div className="glass-card p-8">
                    <div className="flex items-center gap-3 mb-6">
-                      <Zap className="text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                        <Zap size={20} />
+                      </div>
                       <h2 className="text-2xl font-display text-white uppercase">Personalized Safety Directives</h2>
                    </div>
                    
                    <div className="space-y-4">
                       {assessment.data?.coverRemoved && (
-                        <div className="p-4 bg-danger/10 border border-danger/30 rounded-xl flex gap-4">
+                        <MotionDiv initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="p-4 bg-danger/10 border border-danger/30 rounded-xl flex gap-4">
                            <AlertTriangle className="text-danger shrink-0 mt-1" size={20} />
                            <div>
-                              <p className="text-xs font-bold text-danger uppercase mb-1">CRITICAL: COVER REMOVED</p>
-                              <p className="text-sm text-gray-300">You indicated the mattress cover was removed. This releases millions of shards. Do not re-enter the room without P100 respiratory protection.</p>
+                              <p className="text-xs font-bold text-danger uppercase mb-1">CRITICAL ALERT: COVER REMOVED</p>
+                              <p className="text-sm text-gray-300">You indicated the mattress cover was removed. This releases millions of shards. <span className="text-white font-bold">Do not re-enter the room without P100 respiratory protection.</span></p>
                            </div>
-                        </div>
+                        </MotionDiv>
                       )}
-                      {assessment.data?.symptoms?.includes('Respiratory Issues') && (
-                        <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex gap-4">
+                      
+                      {assessment.data?.symptoms?.length > 0 && (
+                        <MotionDiv initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex gap-4">
                            <Activity className="text-yellow-500 shrink-0 mt-1" size={20} />
                            <div>
-                              <p className="text-xs font-bold text-yellow-500 uppercase mb-1">HEALTH ALERT: RESPIRATORY</p>
-                              <p className="text-sm text-gray-300">Your reported respiratory symptoms suggest inhalation exposure. Consult a pulmonologist immediately and mention "particulate glass exposure".</p>
+                              <p className="text-xs font-bold text-yellow-500 uppercase mb-1">HEALTH SYMPTOMS DETECTED</p>
+                              <p className="text-sm text-gray-300">You reported symptoms including {assessment.data.symptoms.slice(0, 2).join(", ")}. Consult a medical professional specifically mentioning "particulate glass exposure".</p>
                            </div>
-                        </div>
+                        </MotionDiv>
                       )}
-                      <div className="p-4 bg-white/5 border border-white/5 rounded-xl flex gap-4">
+
+                      <MotionDiv initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="p-4 bg-white/5 border border-white/5 rounded-xl flex gap-4">
                          <CheckCircle className="text-success shrink-0 mt-1" size={20} />
                          <div>
-                            <p className="text-xs font-bold text-success uppercase mb-1">NEXT STEP: ISOLATION</p>
-                            <p className="text-sm text-gray-300">Based on your location in {assessment.data?.location}, verify local waste disposal laws for hazardous fiber materials.</p>
+                            <p className="text-xs font-bold text-success uppercase mb-1">RECOMMENDED ACTION: ISOLATION</p>
+                            <p className="text-sm text-gray-300">Based on your location in {assessment.data?.location || 'your area'}, verify local waste disposal laws for hazardous fiber materials before disposing of the mattress.</p>
                          </div>
-                      </div>
+                      </MotionDiv>
                    </div>
                 </div>
 
-                <div className="glass-card p-8 bg-gradient-to-r from-primary/10 to-transparent">
-                   <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-display text-white uppercase">Resources & Official Links</h3>
-                      <Link to="/resources" className="text-xs font-bold text-primary flex items-center gap-1">VIEW ALL <ArrowRight size={14}/></Link>
+                {/* Integrated Resources Widget */}
+                <div className="glass-card p-8 bg-gradient-to-br from-surface to-white/5">
+                   <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent">
+                          <Bookmark size={20} />
+                        </div>
+                        <h2 className="text-2xl font-display text-white uppercase">Command Resources</h2>
+                      </div>
+                      <Link to="/resources" className="text-xs font-bold text-primary flex items-center gap-1 hover:text-white transition-colors">VIEW ALL <ArrowRight size={14}/></Link>
                    </div>
-                   <div className="grid md:grid-cols-2 gap-4">
-                      <a href="https://www.mattressfiberglass.org" target="_blank" className="p-4 bg-black/40 rounded-xl border border-white/5 hover:border-primary/50 transition-colors">
-                         <p className="text-xs font-bold text-white uppercase truncate">Mattress Fiberglass Org</p>
-                         <p className="text-[10px] text-muted">Official Support</p>
-                      </a>
-                      <a href="https://www.saferproducts.gov" target="_blank" className="p-4 bg-black/40 rounded-xl border border-white/5 hover:border-danger/50 transition-colors">
-                         <p className="text-xs font-bold text-white uppercase truncate">Report to SaferProducts.gov</p>
-                         <p className="text-[10px] text-muted">Gov Incident Reporting</p>
-                      </a>
+                   
+                   <div className="grid md:grid-cols-3 gap-4">
+                      {RESOURCES.map((cat, i) => (
+                        <div key={i} className="space-y-3">
+                           <p className="text-[10px] font-bold text-muted uppercase tracking-widest border-b border-white/5 pb-2">{cat.category}</p>
+                           <div className="space-y-2">
+                              {cat.links.map((link, j) => (
+                                <a 
+                                  key={j} 
+                                  href={link.url} 
+                                  target="_blank" 
+                                  className="block p-3 rounded-xl bg-black/40 border border-white/5 hover:border-primary/40 hover:bg-white/5 transition-all group"
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-gray-300 group-hover:text-white truncate">{link.label}</span>
+                                    <ExternalLink size={10} className="text-muted group-hover:text-white opacity-0 group-hover:opacity-100 transition-all" />
+                                  </div>
+                                  <p className="text-[9px] text-muted mt-0.5">{link.sub}</p>
+                                </a>
+                              ))}
+                           </div>
+                        </div>
+                      ))}
                    </div>
                 </div>
              </div>
 
-             {/* Quick Actions */}
+             {/* Right Column */}
              <div className="space-y-6">
                 <div className="glass-card p-6">
                   <h2 className="text-xl font-display text-white uppercase mb-4">Quick Actions</h2>
@@ -156,10 +220,13 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-6 bg-secondary/10 border border-secondary/20 rounded-3xl">
-                   <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Did You Know?</h3>
+                <div className="p-6 bg-danger/10 border border-danger/20 rounded-3xl">
+                   <div className="flex items-center gap-3 mb-3">
+                      <AlertTriangle className="text-danger" size={18} />
+                      <h3 className="text-xs font-bold text-danger uppercase tracking-widest">Important Safety Reminder</h3>
+                   </div>
                    <p className="text-xs text-gray-300 leading-relaxed">
-                      Removing the outer cover is the #1 cause of contamination. The SafeGuard AI can detect zipper warnings in photos with 94% accuracy.
+                      If you're experiencing severe health symptoms or suspect serious contamination, seek immediate medical attention and consider professional remediation services. Document everything with photos.
                    </p>
                 </div>
              </div>

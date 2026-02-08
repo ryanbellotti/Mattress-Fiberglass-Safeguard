@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { sendAdvancedChatMessage } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
+const MotionDiv = motion.div as any;
+
 type SidebarTab = 'evidence' | 'sources' | 'protocols';
 
 const AIAssistant: React.FC = () => {
@@ -131,7 +133,7 @@ const AIAssistant: React.FC = () => {
               </div>
             ) : (
               notes.map((note) => (
-                <motion.div 
+                <MotionDiv 
                   layout
                   initial={{ opacity: 0, scale: 0.95 }} 
                   animate={{ opacity: 1, scale: 1 }}
@@ -152,7 +154,7 @@ const AIAssistant: React.FC = () => {
                     </button>
                   </div>
                   <p className="text-gray-300 line-clamp-6">{note.text}</p>
-                </motion.div>
+                </MotionDiv>
               ))
             )
           )}
@@ -207,7 +209,7 @@ const AIAssistant: React.FC = () => {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide">
           <AnimatePresence>
             {messages.map((msg) => (
-              <motion.div
+              <MotionDiv
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -265,19 +267,19 @@ const AIAssistant: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </MotionDiv>
             ))}
           </AnimatePresence>
 
           {isThinking && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-6">
+            <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-6">
               <div className="w-14 h-14 rounded-2xl bg-surface border border-white/10 flex items-center justify-center shrink-0 text-accent">
                 <Loader2 className="animate-spin" size={28} />
               </div>
               <div className="bg-white/5 p-6 rounded-[2rem] rounded-tl-none border border-white/10 flex items-center gap-6 backdrop-blur-md">
                 <div className="flex gap-2">
                   {[...Array(3)].map((_, i) => (
-                    <motion.div 
+                    <MotionDiv 
                       key={i}
                       animate={{ scaleY: [1, 2, 1], opacity: [0.3, 1, 0.3] }}
                       transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
@@ -290,7 +292,7 @@ const AIAssistant: React.FC = () => {
                   <p className="text-[10px] text-muted uppercase font-semibold">Synthesizing Search Grounds & Cross-Contamination Vectors...</p>
                 </div>
               </div>
-            </motion.div>
+            </MotionDiv>
           )}
         </div>
 

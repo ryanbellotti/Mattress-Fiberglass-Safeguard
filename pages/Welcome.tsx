@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Shield, ArrowRight, Activity, Search, Phone, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const MotionDiv = motion.div as any;
+
 const Welcome: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
-      <motion.div 
+      <MotionDiv 
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-8 mb-20"
@@ -37,7 +39,7 @@ const Welcome: React.FC = () => {
             </button>
           </Link>
         </div>
-      </motion.div>
+      </MotionDiv>
 
       <div className="grid md:grid-cols-3 gap-8">
         {[
@@ -60,7 +62,7 @@ const Welcome: React.FC = () => {
             color: "text-accent"
           }
         ].map((f, i) => (
-          <motion.div
+          <MotionDiv
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -72,7 +74,7 @@ const Welcome: React.FC = () => {
             </div>
             <h3 className="text-2xl font-display text-white uppercase mb-4 tracking-wide">{f.title}</h3>
             <p className="text-muted leading-relaxed text-sm">{f.desc}</p>
-          </motion.div>
+          </MotionDiv>
         ))}
       </div>
     </div>

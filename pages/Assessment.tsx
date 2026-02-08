@@ -4,6 +4,8 @@ import { ArrowRight, ArrowLeft, AlertTriangle, Shield, CheckCircle2, User, MapPi
 import { analyzeSafetyMedia } from '../services/geminiService';
 import { useNavigate } from 'react-router-dom';
 
+const MotionDiv = motion.div as any;
+
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -95,7 +97,7 @@ const Assessment: React.FC = () => {
           <p className="text-xs font-bold text-muted uppercase">Phase {step} of 3</p>
         </div>
         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-          <motion.div 
+          <MotionDiv 
             initial={{ width: 0 }}
             animate={{ width: `${(step / 3) * 100}%` }}
             className="h-full bg-primary"
@@ -105,7 +107,7 @@ const Assessment: React.FC = () => {
 
       <AnimatePresence mode="wait">
         {step === 1 && (
-          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+          <MotionDiv key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
             <div className="glass-card p-10 space-y-8">
               <h2 className="text-2xl font-display text-white uppercase tracking-wide flex items-center gap-3">
                 <User className="text-primary" /> Identity & Coordinates
@@ -137,11 +139,11 @@ const Assessment: React.FC = () => {
               <Shield className="text-primary shrink-0" size={32} />
               <p className="text-sm text-gray-300">This data helps the AI cross-reference local manufacturer regulations and class-action lawsuit availability.</p>
             </div>
-          </motion.div>
+          </MotionDiv>
         )}
 
         {step === 2 && (
-          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+          <MotionDiv key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
             <div className="glass-card p-10 space-y-8">
               <h2 className="text-2xl font-display text-white uppercase tracking-wide flex items-center gap-3">
                 <ClipboardList className="text-secondary" /> Mattress Inventory
@@ -195,11 +197,11 @@ const Assessment: React.FC = () => {
                 <p className="text-sm text-gray-300 font-bold uppercase">Emergency Notice: DO NOT remove the cover if it is currently on. This will trigger a high-severity contamination event.</p>
               </div>
             )}
-          </motion.div>
+          </MotionDiv>
         )}
 
         {step === 3 && (
-          <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+          <MotionDiv key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
             <div className="glass-card p-10 space-y-10">
               <div className="space-y-4">
                 <h2 className="text-2xl font-display text-white uppercase tracking-wide flex items-center gap-3">
@@ -235,11 +237,11 @@ const Assessment: React.FC = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         )}
 
         {step === 4 && (
-          <motion.div key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8 pb-20">
+          <MotionDiv key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8 pb-20">
              <div className="glass-card p-12 text-center space-y-6 border-accent/30 shadow-[0_0_50px_rgba(34,211,238,0.2)]">
                 <div className="w-24 h-24 bg-accent/20 rounded-full flex items-center justify-center mx-auto text-accent mb-4">
                    <Sparkles size={48} className="animate-pulse" />
@@ -283,7 +285,7 @@ const Assessment: React.FC = () => {
                    </button>
                 </div>
              </div>
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
 

@@ -3,6 +3,8 @@ import { Image as ImageIcon, Wand2, Download, Loader2, Sparkles, Sliders, Chevro
 import { generateSafetyGraphic } from '../services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const MotionDiv = motion.div as any;
+
 const SafetyLab: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [size, setSize] = useState<'1K' | '2K' | '4K'>('1K');
@@ -91,14 +93,14 @@ const SafetyLab: React.FC = () => {
           <div className="glass-card aspect-square w-full relative overflow-hidden flex items-center justify-center border-2 border-dashed border-white/5 group">
             <AnimatePresence mode="wait">
               {isGenerating ? (
-                <motion.div 
+                <MotionDiv 
                   initial={{ opacity: 0 }} 
                   animate={{ opacity: 1 }} 
                   exit={{ opacity: 0 }}
                   className="text-center space-y-6"
                 >
                   <div className="relative w-32 h-32 mx-auto">
-                    <motion.div 
+                    <MotionDiv 
                       animate={{ rotate: 360 }} 
                       transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
                       className="absolute inset-0 border-2 border-t-primary border-transparent rounded-full"
@@ -111,9 +113,9 @@ const SafetyLab: React.FC = () => {
                     <p className="text-xl font-display text-white uppercase tracking-widest animate-pulse">Forging Pixels...</p>
                     <p className="text-[10px] text-muted font-bold uppercase">Scaling Neural Tensors to {size}</p>
                   </div>
-                </motion.div>
+                </MotionDiv>
               ) : generatedImage ? (
-                <motion.div 
+                <MotionDiv 
                   initial={{ opacity: 0, scale: 0.9 }} 
                   animate={{ opacity: 1, scale: 1 }}
                   className="w-full h-full relative group"
@@ -131,7 +133,7 @@ const SafetyLab: React.FC = () => {
                   <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10">
                      <p className="text-[10px] text-white/80 line-clamp-2 italic">"{prompt}"</p>
                   </div>
-                </motion.div>
+                </MotionDiv>
               ) : (
                 <div className="text-center opacity-30 space-y-4">
                   <ImageIcon size={64} className="mx-auto text-muted" />
