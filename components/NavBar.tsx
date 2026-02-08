@@ -1,52 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, LayoutDashboard, MessageCircle, Search, Sparkles, 
-  Camera, Shield, Phone, FileText, Users, AlertCircle, 
-  Mail, BookOpen, Fingerprint, Wand2
-} from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { clsx } from 'clsx';
+import { navigationGroups } from '../config/navigation';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
-
-  const groups = [
-    {
-      title: 'CORE',
-      items: [
-        { label: 'Home', path: '/', icon: Home, color: 'text-primary' },
-        { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard, color: 'text-primary' },
-        { label: 'Assessment', path: '/assessment', icon: Fingerprint, color: 'text-primary' },
-      ]
-    },
-    {
-      title: 'EMERGENCY & TOOLS',
-      items: [
-        { label: 'Live AI Expert', path: '/live', icon: Phone, color: 'text-danger' },
-        { label: 'Cleanup Guide', path: '/cleanup', icon: Sparkles, color: 'text-secondary' },
-        { label: 'Scan (Multimodal)', path: '/scan', icon: Camera, color: 'text-accent' },
-        { label: 'Safety Lab', path: '/lab', icon: Wand2, color: 'text-primary' },
-        { label: 'Mattress Checker', path: '/checker', icon: Search, color: 'text-success' },
-      ]
-    },
-    {
-      title: 'HUB & KNOWLEDGE',
-      items: [
-        { label: 'Education Hub', path: '/hub', icon: BookOpen, color: 'text-accent' },
-        { label: 'AI Chat', path: '/assistant', icon: MessageCircle, color: 'text-primary' },
-        { label: 'Community Forum', path: '/forum', icon: Users, color: 'text-secondary' },
-        { label: 'Resources', path: '/resources', icon: FileText, color: 'text-muted' },
-        { label: 'Org Resources', path: '/org-resources', icon: Shield, color: 'text-primary' },
-      ]
-    },
-    {
-      title: 'REPORTING',
-      items: [
-        { label: 'Report Incident', path: '/report', icon: AlertCircle, color: 'text-danger' },
-        { label: 'Contact Us', path: '/contact', icon: Mail, color: 'text-muted' },
-      ]
-    }
-  ];
 
   return (
     <nav className="fixed left-0 top-0 h-full w-16 md:w-64 bg-surface border-r border-white/5 flex flex-col z-50 transition-all duration-300">
@@ -61,7 +20,7 @@ const NavBar: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto py-4 space-y-6 px-2 scrollbar-hide">
-        {groups.map((group, gIdx) => (
+        {navigationGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             <h3 className="hidden md:block text-[10px] font-bold text-muted px-4 mb-2 tracking-[0.2em]">
               {group.title}
