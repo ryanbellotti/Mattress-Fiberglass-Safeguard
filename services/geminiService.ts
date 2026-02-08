@@ -1,5 +1,5 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { resizeImage } from "../utils/imageUtils";
 
 // Advanced Chat with Thinking & Search
 export const sendAdvancedChatMessage = async (
@@ -37,11 +37,27 @@ export const sendAdvancedChatMessage = async (
 export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, prompt: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
+    let processedData = base64Data;
+
+    // Resize image if it's an image to optimize performance
+    if (mimeType.startsWith('image/')) {
+        const originalSize = base64Data.length;
+        console.time('Image Resize');
+        processedData = await resizeImage(base64Data, mimeType);
+        console.timeEnd('Image Resize');
+        const newSize = processedData.length;
+        if (newSize < originalSize) {
+            console.log(`Image resized: ${originalSize} -> ${newSize} bytes (${Math.round((1 - newSize / originalSize) * 100)}% reduction)`);
+        } else {
+            console.log(`Image not resized (original: ${originalSize}, new: ${newSize})`);
+        }
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       contents: {
         parts: [
-          { inlineData: { mimeType, data: base64Data } },
+          { inlineData: { mimeType, data: processedData } },
           { text: prompt }
         ]
       },
