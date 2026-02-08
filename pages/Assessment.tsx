@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, AlertTriangle, Shield, CheckCircle2, User, MapPin, Activity, ClipboardList, Loader2, Sparkles } from 'lucide-react';
-import { analyzeSafetyMedia } from '../services/geminiService';
+import { useNeuralDiagnostic } from '../hooks/useNeuralDiagnostic.ts';
 import { useNavigate } from 'react-router-dom';
 
 const MotionDiv = motion.div as any;
@@ -9,7 +9,7 @@ const MotionDiv = motion.div as any;
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { runDiagnostic, isAnalyzing, result: aiResult } = useNeuralDiagnostic();
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -21,12 +21,11 @@ const Assessment: React.FC = () => {
     areas: [] as string[]
   });
 
-  const [aiResult, setAiResult] = useState<any>(null);
 
   const symptomOptions = ["Skin Rashes", "Respiratory Issues", "Eye Irritation", "Persistent Cough", "Sore Throat", "Itching"];
   const areaOptions = ["Bedroom", "Living Room", "HVAC Vents", "Clothing", "Entire Home"];
 
-  const handleNext = () => step < 3 ? setStep(step + 1) : runNeuralDiagnostic();
+  const handleNext = async () => { if (step < 3) { setStep(step + 1); } else { await runDiagnostic(formData); setStep(4); } };
   const handleBack = () => step > 1 && setStep(step - 1);
 
   const toggleSymptom = (s: string) => {
@@ -43,47 +42,6 @@ const Assessment: React.FC = () => {
     }));
   };
 
-  const runNeuralDiagnostic = async () => {
-    setIsAnalyzing(true);
-    try {
-      const prompt = `Analyze this mattress fiberglass exposure case:
-      User: ${formData.name} in ${formData.location}
-      Mattress: ${formData.brand} ${formData.model}
-      Cover Removed: ${formData.coverRemoved ? 'YES (HIGH RISK)' : 'NO'}
-      Visible Fibers: ${formData.visibleFibers ? 'YES' : 'NO'}
-      Symptoms: ${formData.symptoms.join(', ')}
-      Impact Areas: ${formData.areas.join(', ')}
-      
-      Provide a Severity (Low, Medium, High, Extreme) and a 4-step remediation protocol.`;
-
-      const response = await analyzeSafetyMedia("", "image/png", prompt);
-      setAiResult(response);
-      
-      // PERSIST DATA FOR DASHBOARD
-      const assessmentData = {
-        date: new Date().toISOString(),
-        data: formData,
-        result: response,
-        status: 'Complete'
-      };
-      localStorage.setItem('safeguard_assessment', JSON.stringify(assessmentData));
-      
-      setStep(4);
-    } catch (e) {
-      console.error(e);
-      // Fallback save even on error for demo purposes
-      const fallbackData = {
-        date: new Date().toISOString(),
-        data: formData,
-        result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"] },
-        status: 'Complete'
-      };
-      localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));
-      setStep(4);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
