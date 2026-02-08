@@ -31,18 +31,20 @@ const MattressChecker: React.FC = () => {
       // Logic: Check local first for "Instant Discovery", then fall back to Search Grounding
       const localMatch = LOCAL_DATABASE.find(item => item.brand.toLowerCase().includes(query.toLowerCase()));
       
-      const data = await checkBrandWithSearch(query);
-      
       if (localMatch) {
          setResult({
-           ...data,
            riskLevel: localMatch.risk,
            containsFiberglass: localMatch.fg,
-           isLocalMatch: true
+           isLocalMatch: true,
+           summary: `Instant Database Match: The brand '${localMatch.brand}' has been verified against our internal safety database.`,
+           sources: []
          });
-      } else {
-         setResult(data);
+         return;
       }
+
+      const data = await checkBrandWithSearch(query);
+      setResult(data);
+
     } catch (error) {
       console.error(error);
     } finally {
