@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const MotionDiv = motion.div as any;
 
+// Confirmed syntax: const LiveExpert: React.FC = ...
 const LiveExpert: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
