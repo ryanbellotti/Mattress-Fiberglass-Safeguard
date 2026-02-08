@@ -40,6 +40,7 @@ const CleanupGuide: React.FC = () => {
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioCache = useRef<Map<number, AudioBuffer>>(new Map());
 
   useEffect(() => {
     return () => {
@@ -58,17 +59,28 @@ const CleanupGuide: React.FC = () => {
       return;
     }
 
-    const text = `${protocols[activeStep].title}. ${protocols[activeStep].desc}. Critical notice: ${protocols[activeStep].critical}`;
     setIsLoadingAudio(true);
     try {
-      const base64Audio = await generateSpeech(text);
-      if (base64Audio) {
-        if (!audioContextRef.current) {
-          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-          audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+      if (!audioContextRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+      }
+
+      let buffer = audioCache.current.get(activeStep);
+
+      if (!buffer) {
+        const text = `${protocols[activeStep].title}. ${protocols[activeStep].desc}. Critical notice: ${protocols[activeStep].critical}`;
+        const base64Audio = await generateSpeech(text);
+
+        if (base64Audio) {
+          const audioData = base64ToUint8Array(base64Audio);
+          const newBuffer = await decodeAudioData(audioData, audioContextRef.current, 24000, 1);
+          audioCache.current.set(activeStep, newBuffer);
+          buffer = newBuffer;
         }
-        const audioData = base64ToUint8Array(base64Audio);
-        const buffer = await decodeAudioData(audioData, audioContextRef.current, 24000, 1);
+      }
+
+      if (buffer) {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContextRef.current.destination);
