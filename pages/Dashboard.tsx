@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap, ExternalLink, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DASHBOARD_RESOURCES } from '@/data/resources';
 
 const MotionDiv = motion.div as any;
 
@@ -20,32 +21,6 @@ const Dashboard: React.FC = () => {
       default: return 'text-success';
     }
   };
-
-  const RESOURCES = [
-    {
-      category: "Official Information",
-      links: [
-        { label: "Mattress Fiberglass Org", url: "https://mattressfiberglass.org", sub: "Main Website" },
-        { label: "CA Dept Public Health", url: "https://cdph.ca.gov", sub: "Fact Sheet" },
-        { label: "NIH Research", url: "https://nih.gov", sub: "Science" }
-      ]
-    },
-    {
-      category: "Safety & ID",
-      links: [
-        { label: "Fiberglass-Free Brands", url: "#", sub: "Safe List" },
-        { label: "Sleep Advisor Guide", url: "https://sleepadvisor.org", sub: "Identification" },
-        { label: "Poison Control", url: "https://poison.org", sub: "Expert Info" }
-      ]
-    },
-    {
-      category: "Community & Reporting",
-      links: [
-        { label: "Facebook Support Group", url: "#", sub: "Join Community" },
-        { label: "SaferProducts.gov", url: "https://saferproducts.gov", sub: "Report Incident" }
-      ]
-    }
-  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -171,7 +146,7 @@ const Dashboard: React.FC = () => {
                    </div>
                    
                    <div className="grid md:grid-cols-3 gap-4">
-                      {RESOURCES.map((cat, i) => (
+                      {DASHBOARD_RESOURCES.map((cat, i) => (
                         <div key={i} className="space-y-3">
                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest border-b border-white/5 pb-2">{cat.category}</p>
                            <div className="space-y-2">
