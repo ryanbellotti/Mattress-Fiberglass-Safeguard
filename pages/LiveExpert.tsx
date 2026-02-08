@@ -3,6 +3,7 @@ import { Mic, Phone, PhoneOff, Volume2, ShieldAlert, Loader2, Signal, Radio } fr
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { base64ToUint8Array, arrayBufferToBase64, decodeAudioData, float32To16BitPCM } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SYSTEM_INSTRUCTIONS } from '../constants/prompts';
 
 const MotionDiv = motion.div as any;
 
@@ -79,7 +80,7 @@ const LiveExpert: React.FC = () => {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } },
           },
-          systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. You are on an emergency call with a user who suspects fiberglass contamination. You are empathetic, masculine, and authoritative. Your goal is to guide them through immediate safety measures. Be conversational, interruptible, and calm. Protocol: 1. Confirm cover is not removed. 2. Isolate HVAC. 3. Put on N95. 4. Evacuate pets/children.",
+          systemInstruction: SYSTEM_INSTRUCTIONS.LIVE_EXPERT,
         },
         callbacks: {
           onopen: () => {
