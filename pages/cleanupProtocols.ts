@@ -6,14 +6,18 @@ export interface ProtocolStep {
 
 export interface LevelProtocol {
   title: string;
+  label: string;
   color: string;
+  showDIYDisclaimer: boolean;
   steps: ProtocolStep[];
 }
 
 export const CLEANUP_PROTOCOLS: Record<string, LevelProtocol> = {
   mild: {
     title: "Mild Contamination Cleanup",
+    label: "Mild Protocol",
     color: "#10b981",
+    showDIYDisclaimer: false,
     steps: [
       {
         title: "Visual Inspection with Flashlight",
@@ -79,7 +83,9 @@ export const CLEANUP_PROTOCOLS: Record<string, LevelProtocol> = {
   },
   moderate: {
     title: "Moderate Contamination Cleanup",
+    label: "Moderate Protocol",
     color: "#f59e0b",
+    showDIYDisclaimer: false,
     steps: [
       {
         title: "Visual Inspection & Assessment",
@@ -170,7 +176,9 @@ export const CLEANUP_PROTOCOLS: Record<string, LevelProtocol> = {
   },
   severe: {
     title: "Severe Contamination Cleanup",
+    label: "Severe Protocol",
     color: "#ef4444",
+    showDIYDisclaimer: true,
     steps: [
       {
         title: "Professional remediation STRONGLY RECOMMENDED",
