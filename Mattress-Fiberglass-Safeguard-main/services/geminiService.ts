@@ -26,7 +26,7 @@ export const sendAdvancedChatMessage = async (
       ?.map((chunk: any) => chunk.web)
       .filter((u: any) => u) || [];
 
-    return { text: response.text, sources };
+    return { text: response.text(), sources };
   } catch (error) {
     console.error("Chat Error:", error);
     return { text: "Connection to safety nexus interrupted.", sources: [] };
@@ -63,7 +63,7 @@ export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, p
         }
       }
     });
-    return JSON.parse(response.text || "{}");
+    return JSON.parse(response.text() || "{}");
   } catch (error) {
     console.error("Media Analysis Error:", error);
     throw error;
@@ -105,7 +105,7 @@ export const checkBrandWithSearch = async (brandName: string) => {
       }
     });
 
-    const text = response.text || "";
+    const text = response.text() || "";
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
       ?.map((chunk: any) => chunk.web?.uri)
       .filter((u: any) => u) || [];
