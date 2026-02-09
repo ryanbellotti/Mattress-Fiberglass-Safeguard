@@ -7,7 +7,7 @@ export const sendAdvancedChatMessage = async (
   message: string
 ) => {
   // Always initialize GoogleGenAI within the call scope to ensure the latest API key is used
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'proxy-key', baseURL: '/api/gemini' });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
@@ -35,7 +35,7 @@ export const sendAdvancedChatMessage = async (
 
 // Image/Video Understanding for the Scan page
 export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, prompt: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'proxy-key', baseURL: '/api/gemini' });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
@@ -72,7 +72,7 @@ export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, p
 
 // High-Res Image Generation
 export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | "4K") => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'proxy-key', baseURL: '/api/gemini' });
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-image-preview',
     contents: { parts: [{ text: prompt }] },
@@ -91,7 +91,7 @@ export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | 
 
 // Added: Search-grounded brand auditor for MattressChecker.tsx
 export const checkBrandWithSearch = async (brandName: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'proxy-key', baseURL: '/api/gemini' });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -130,7 +130,7 @@ export const checkBrandWithSearch = async (brandName: string) => {
 
 // Added: Audio synthesis for hands-free cleanup guidance in CleanupGuide.tsx
 export const generateSpeech = async (text: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'proxy-key', baseURL: '/api/gemini' });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
