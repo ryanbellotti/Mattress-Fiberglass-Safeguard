@@ -15,7 +15,7 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
   isThinking?: boolean;
-  sources?: { web?: { title: string, uri: string } }[];
+  sources?: { title?: string; uri?: string }[];
 }
 
 export interface GroundingSource {

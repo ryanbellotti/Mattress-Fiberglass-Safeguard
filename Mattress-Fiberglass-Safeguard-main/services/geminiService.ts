@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { GoogleGenAI, Type, Modality, GroundingChunk, GroundingChunkWeb } from "@google/genai";
 
 // Advanced Chat with Thinking & Search
 export const sendAdvancedChatMessage = async (
@@ -10,10 +10,10 @@ export const sendAdvancedChatMessage = async (
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: "gemini-3-pro-preview",
       contents: [
         ...history,
-        { role: 'user', parts: [{ text: message }] }
+        { role: "user", parts: [{ text: message }] }
       ],
       config: {
         thinkingConfig: { thinkingBudget: 32768 },
@@ -23,8 +23,8 @@ export const sendAdvancedChatMessage = async (
     });
     
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk: any) => chunk.web)
-      .filter((u: any) => u) || [];
+      ?.map((chunk: GroundingChunk) => chunk.web)
+      .filter((u): u is GroundingChunkWeb => !!u) || [];
 
     return { text: response.text, sources };
   } catch (error) {
@@ -38,7 +38,7 @@ export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, p
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: "gemini-3-pro-preview",
       contents: {
         parts: [
           { inlineData: { mimeType, data: base64Data } },
@@ -74,7 +74,7 @@ export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, p
 export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | "4K") => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-image-preview',
+    model: "gemini-3-pro-image-preview",
     contents: { parts: [{ text: prompt }] },
     config: {
       imageConfig: { aspectRatio: "1:1", imageSize: size }
@@ -94,7 +94,7 @@ export const checkBrandWithSearch = async (brandName: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: "gemini-3-flash-preview",
       contents: `Perform a safety audit for the mattress brand/model: "${brandName}". 
       Is it known to contain fiberglass in its fire barrier? 
       What is the risk level (High, Medium, or Low)?
@@ -107,18 +107,18 @@ export const checkBrandWithSearch = async (brandName: string) => {
 
     const text = response.text || "";
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk: any) => chunk.web?.uri)
-      .filter((u: any) => u) || [];
+      ?.map((chunk: GroundingChunk) => chunk.web?.uri)
+      .filter((u): u is string => !!u) || [];
 
     // Analyze response text for structured UI display
     const lowerText = text.toLowerCase();
-    let riskLevel: 'high' | 'medium' | 'low' = 'low';
-    if (lowerText.includes('high')) riskLevel = 'high';
-    else if (lowerText.includes('medium')) riskLevel = 'medium';
+    let riskLevel: "high" | "medium" | "low" = "low";
+    if (lowerText.includes("high")) riskLevel = "high";
+    else if (lowerText.includes("medium")) riskLevel = "medium";
 
     return {
       riskLevel,
-      containsFiberglass: lowerText.includes('yes') || lowerText.includes('confirmed') || lowerText.includes('contains fiberglass'),
+      containsFiberglass: lowerText.includes("yes") || lowerText.includes("confirmed") || lowerText.includes("contains fiberglass"),
       summary: text,
       sources
     };
@@ -139,7 +139,7 @@ export const generateSpeech = async (text: string) => {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
+            prebuiltVoiceConfig: { voiceName: "Kore" },
           },
         },
       },
