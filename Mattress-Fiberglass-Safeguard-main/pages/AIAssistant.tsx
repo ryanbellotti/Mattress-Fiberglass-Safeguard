@@ -54,17 +54,25 @@ const AIAssistant: React.FC = () => {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    // Optimistic Update
+    const currentMessages = [...messages, userMsg];
+    setMessages(currentMessages);
     setInput('');
     setIsThinking(true);
 
     try {
-      const history = messages.map(m => ({
-        role: m.role,
+      // Create history from the updated state immediately
+      const history = currentMessages.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }]
       }));
 
-      const { text, sources } = await sendAdvancedChatMessage(history, userMsg.text);
+      // Remove the last message (current user msg) as it is passed as the 'message' arg to the function
+      // but sendAdvancedChatMessage usually appends it. Let's send history excluding the very last one 
+      // if the service expects (history, currentMsg).
+      const historyForService = history.slice(0, -1);
+
+      const { text, sources } = await sendAdvancedChatMessage(historyForService, userMsg.text);
 
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -79,7 +87,7 @@ const AIAssistant: React.FC = () => {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'model',
-        text: "Error in safety nexus. Protocol interrupted.",
+        text: "Error in safety nexus. Protocol interrupted. Please verify API Key.",
         timestamp: new Date()
       }]);
     } finally {

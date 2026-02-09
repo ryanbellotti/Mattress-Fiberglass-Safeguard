@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2, Sparkles, Loader2, ShieldAlert, ExternalLink } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -143,45 +143,85 @@ export const CommunityForum: React.FC = () => {
 };
 
 export const ReportIncident: React.FC = () => {
-  const [submitted, setSubmitted] = useState(false);
-
-  if (submitted) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center text-center p-4">
-        <CheckCircle2 size={64} className="text-success mb-6" />
-        <h1 className="text-4xl font-display text-white uppercase">Report Logged</h1>
-        <p className="text-muted mt-2">Your data has been encrypted and added to the registry.</p>
-        <button onClick={() => setSubmitted(false)} className="mt-8 text-xs font-bold text-white underline">Submit Another</button>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 space-y-8">
+    <div className="max-w-6xl mx-auto py-10 px-4 space-y-12">
       <div className="text-center space-y-2">
-        <h1 className="text-5xl font-display text-white uppercase tracking-tighter">Incident Registry</h1>
-        <p className="text-danger text-xs font-bold uppercase tracking-[0.3em]">Official Data Collection</p>
+        <h1 className="text-5xl font-display text-white uppercase tracking-tighter">Incident Command</h1>
+        <p className="text-danger text-xs font-bold uppercase tracking-[0.3em]">Submit Data & Notify Federal Authorities</p>
       </div>
 
-      <div className="glass-card p-10 space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted uppercase">Brand Name</label>
-            <input type="text" className="w-full neuro-inset p-3 rounded-lg text-white outline-none" placeholder="e.g. Zinus" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted uppercase">Purchase Year</label>
-            <input type="text" className="w-full neuro-inset p-3 rounded-lg text-white outline-none" placeholder="e.g. 2019" />
-          </div>
+      <div className="grid lg:grid-cols-2 gap-12 items-start">
+        
+        {/* SECTION 1: USER FORM (Requested First) */}
+        <div className="flex flex-col items-center space-y-4">
+             <div className="glass-card p-2 bg-white rounded-[3rem] border-8 border-surface shadow-2xl relative">
+                {/* iPhone-like Frame Element */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-surface rounded-b-2xl z-10"></div>
+                <iframe
+                    id="JotFormIFrame-253007406534147"
+                    title="Mattress Fiberglass Leak Report"
+                    allow="geolocation; microphone; camera"
+                    src="https://www.jotform.com/app/253007406534147?appEmbedded=1"
+                    style={{ height: '700px', width: '375px', border: 'none', borderRadius: '2rem' }}
+                />
+             </div>
+             <p className="text-xs text-muted uppercase tracking-widest mt-4">SafeGuard Internal Advocate Registry</p>
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-muted uppercase">Incident Description</label>
-          <textarea className="w-full neuro-inset p-3 rounded-lg text-white outline-none h-32" placeholder="Describe how contamination occurred..." />
+
+        {/* SECTION 2: FEDERAL REPORT (Predominant & Important) */}
+        <div className="space-y-8 lg:sticky lg:top-24">
+            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-danger/20 to-danger/5 border border-danger/30 relative overflow-hidden shadow-[0_0_50px_rgba(244,63,94,0.15)]">
+                <div className="absolute top-0 right-0 p-8 opacity-10 text-danger">
+                    <ShieldAlert size={140} />
+                </div>
+                
+                <div className="relative z-10 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-danger text-white text-[10px] font-bold uppercase tracking-widest">
+                        <AlertCircle size={12} /> Federal Action Required
+                    </div>
+                    
+                    <h2 className="text-4xl font-display text-white uppercase leading-[0.9]">
+                        File a CPSC Complaint <span className="text-danger">Immediately</span>
+                    </h2>
+                    
+                    <p className="text-gray-200 text-sm leading-relaxed font-medium">
+                        While our internal form collects data for advocacy, filing with <strong>SaferProducts.gov</strong> is the <span className="text-white underline decoration-danger underline-offset-4">only legal mechanism</span> that forces the U.S. Government to investigate and issue recalls.
+                    </p>
+
+                    <div className="space-y-4 bg-black/20 p-6 rounded-2xl border border-white/5">
+                        <h3 className="text-xs font-bold text-white uppercase tracking-widest border-b border-white/10 pb-2 mb-2">Why This Is Critical</h3>
+                        <ul className="space-y-3">
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Creates a permanent federal record manufacturers cannot delete.</span>
+                            </li>
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Triggers automatic investigation algorithms at the CPSC.</span>
+                            </li>
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Publicly warns other families via the national database.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a
+                        href="https://www.saferproducts.gov/IncidentEntry"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group w-full py-5 rounded-2xl bg-danger hover:bg-red-500 text-white font-bold text-lg uppercase tracking-wide flex items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                    >
+                        Launch Federal Report <ExternalLink size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </a>
+                    
+                    <p className="text-[10px] text-center text-white/40 uppercase tracking-widest">
+                        Redirects to SaferProducts.gov (Official US Govt Site)
+                    </p>
+                </div>
+            </div>
         </div>
-        <button onClick={() => setSubmitted(true)} className="w-full neuro-btn bg-danger text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-          <AlertCircle size={20} /> SUBMIT TO REGISTRY
-        </button>
-        <p className="text-xs text-center text-muted">Data is aggregated for regulatory complaints to CPSC.</p>
+
       </div>
     </div>
   );

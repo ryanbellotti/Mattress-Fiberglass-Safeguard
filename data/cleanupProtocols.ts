@@ -1,9 +1,27 @@
 export const CLEANUP_PROTOCOLS = {
-  mild: {
-    title: "Mild Contamination Cleanup",
+  none: {
+    title: "No Contamination Detected",
     color: "text-success",
     borderColor: "border-success",
     bgColor: "bg-success/10",
+    steps: [
+      {
+        title: "Routine Inspection",
+        description: "Verify your safety status periodically.",
+        details: "While your assessment indicates no current contamination, it is good practice to inspect your mattress cover for tears or wear every 6 months. Do not remove the cover for washing, even if the zipper is present."
+      },
+      {
+        title: "Preventative Measure",
+        description: "Use a Mattress Encasement.",
+        details: "To ensure future safety, purchase a high-quality, zipper-locking mattress encasement. This traps any potential fibers inside and protects the mattress from external damage."
+      }
+    ]
+  },
+  mild: {
+    title: "Mild Contamination Cleanup",
+    color: "text-emerald-400",
+    borderColor: "border-emerald-400",
+    bgColor: "bg-emerald-900/20",
     steps: [
       {
         title: "Visual Inspection with Flashlight",
@@ -69,9 +87,9 @@ export const CLEANUP_PROTOCOLS = {
   },
   moderate: {
     title: "Moderate Contamination Cleanup",
-    color: "text-yellow-500",
-    borderColor: "border-yellow-500",
-    bgColor: "bg-yellow-500/10",
+    color: "text-amber-400",
+    borderColor: "border-amber-400",
+    bgColor: "bg-amber-900/20",
     steps: [
       {
         title: "Visual Inspection & Assessment",
@@ -162,9 +180,9 @@ export const CLEANUP_PROTOCOLS = {
   },
   severe: {
     title: "Severe Contamination Cleanup",
-    color: "text-danger",
-    borderColor: "border-danger",
-    bgColor: "bg-danger/10",
+    color: "text-red-500",
+    borderColor: "border-red-500",
+    bgColor: "bg-red-900/20",
     steps: [
       {
         title: "Flashlight Inspection - Assess Severity",
@@ -237,6 +255,11 @@ export const CLEANUP_PROTOCOLS = {
         details: "Use tack cloths and lint rollers on EVERY surface - corners, edges, crevices, textured areas, baseboards, window tracks, door frames. This step is labor-intensive but essential. Re-inspect with flashlight after detail cleaning."
       },
       {
+        title: "DIY: Multiple Complete Cleaning Cycles",
+        description: "Repeat full cleaning cycle 3-5+ times minimum",
+        details: "Severe cases require MANY passes. Complete cycle: wet wipe to HEPA vacuum to detail clean. Repeat at least 3-5 times in EACH room. Wait 1-2 days between cycles. Inspect with flashlight between passes under bright light. Continue until visible fibers are dramatically reduced. Expect this to take weeks."
+      },
+      {
         title: "DIY: Carpet Removal Strongly Recommended",
         description: "Remove and replace all contaminated carpeting",
         details: "For severe cases, carpet removal and replacement is STRONGLY recommended. Carpets cannot be effectively DIY cleaned of fiberglass. If you must attempt: multiple HEPA vacuuming sessions daily + professional steam cleaning (explicitly mentioning fiberglass) + more HEPA vacuuming. Still unlikely to remove embedded fibers. Removal is safer."
@@ -245,6 +268,31 @@ export const CLEANUP_PROTOCOLS = {
         title: "DIY: Professional HVAC Cleaning Essential",
         description: "HVAC must be professionally cleaned - DIY is insufficient",
         details: "If HVAC ran during contamination, system is contaminated and has spread fibers everywhere. Professional HVAC cleaning is ESSENTIAL - entire system (all ducts, coils, blower, return vents). Changing filters alone does NOT work. May require duct replacement in severe cases. Keep system OFF until professionally cleaned. Change filters daily once restarted."
+      },
+      {
+        title: "DIY: Extended Air Scrubbing",
+        description: "Run HEPA air scrubbers for extended period",
+        details: "After bulk cleaning, place rented HEPA air scrubbers in cleaned rooms. Run continuously for 3-7+ days (severe cases need longer). Change filters per instructions. Open windows with fans exhausting outward when weather permits. Monitor air quality. This helps remove remaining airborne particles but cannot replace professional air quality testing."
+      },
+      {
+        title: "DIY: Careful Evaluation of Bagged Items",
+        description: "Process saved items with extreme caution outside",
+        details: "Wearing full PPE, process bagged items outside or isolated garage. Open bags one at a time. Inspect each item meticulously with flashlight in bright light. DISCARD (most recommended): All items with any visible fibers, porous items, complex items, most clothing/bedding. ATTEMPT TO CLEAN (risky): Only hard, non-porous items with no visible fibers - wipe thoroughly multiple times, tack cloth all crevices. Washables - wash separately 3+ times, hot water, inspect after EACH wash. When ANY doubt - DISCARD. Most items should be discarded in severe cases."
+      },
+      {
+        title: "DIY: Seal & Dispose All Contaminated Waste",
+        description: "Proper disposal of extensive contaminated materials",
+        details: "All waste (vacuum contents, countless cloths, tack cloths, tape, PPE, discarded items, bags) must be in sealed heavy-duty bags. Label clearly and prominently: 'CONTAMINATED - FIBERGLASS - DO NOT INCINERATE' or similar warning. Check local regulations for hazardous waste disposal. May need special arrangements for volume. Document disposal for records."
+      },
+      {
+        title: "DIY: Rigorous Personal Decontamination",
+        description: "Meticulous PPE removal and personal cleaning after EACH session",
+        details: "After EACH work session, decontaminate outside or designated area before entering clean zones. Remove PPE carefully in sequence: coveralls (roll inside out), gloves (inside out), eye protection, respirator last. Avoid all shaking. Bag ALL disposable items immediately. Remove contaminated clothing underneath (if worn) - wash separately multiple times or discard. Take cool shower immediately - rinse without scrubbing first, then wash gently, thorough hair wash. This is required after EVERY cleanup session."
+      },
+      {
+        title: "DIY: Ongoing Monitoring & Re-cleaning",
+        description: "Continue monitoring and be prepared for repeated efforts",
+        details: "After initial intensive cleaning: Monitor constantly with flashlight inspections. Continue regular HEPA vacuuming (daily initially, then weekly). Damp dust surfaces frequently. Re-clean areas showing any fiber reappearance. Change HVAC filters very frequently (weekly initially). Keep detailed notes. Expect to find recurring fibers - severe contamination is extremely difficult to fully resolve DIY."
       },
       {
         title: "Professional Air Quality Testing Required",
