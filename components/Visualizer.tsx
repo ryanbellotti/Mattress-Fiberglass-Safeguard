@@ -56,12 +56,26 @@ const Visualizer: React.FC = () => {
 
   const capturePhoto = () => {
     if (videoRef.current) {
+      const MAX_SIZE = 1024;
+      let width = videoRef.current.videoWidth;
+      let height = videoRef.current.videoHeight;
+
+      if (width > MAX_SIZE || height > MAX_SIZE) {
+        if (width > height) {
+          height = Math.round((height * MAX_SIZE) / width);
+          width = MAX_SIZE;
+        } else {
+          width = Math.round((width * MAX_SIZE) / height);
+          height = MAX_SIZE;
+        }
+      }
+
       const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0);
+        ctx.drawImage(videoRef.current, 0, 0, width, height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         const base64 = dataUrl.split(',')[1];
         setMedia({
