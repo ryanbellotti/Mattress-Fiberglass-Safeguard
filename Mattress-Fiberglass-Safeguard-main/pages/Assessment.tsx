@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, AlertTriangle, Shield, CheckCircle2, User, MapPin, Activity, ClipboardList, Loader2, Sparkles } from 'lucide-react';
+import { AssessmentResult } from "../types";
 import { analyzeSafetyMedia } from '../services/geminiService';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +22,7 @@ const Assessment: React.FC = () => {
     areas: [] as string[]
   });
 
-  const [aiResult, setAiResult] = useState<any>(null);
+  const [aiResult, setAiResult] = useState<AssessmentResult | null>(null);
 
   const symptomOptions = ["Skin Rashes", "Respiratory Issues", "Eye Irritation", "Persistent Cough", "Sore Throat", "Itching"];
   const areaOptions = ["Bedroom", "Living Room", "HVAC Vents", "Clothing", "Entire Home"];
@@ -75,7 +76,7 @@ const Assessment: React.FC = () => {
       const fallbackData = {
         date: new Date().toISOString(),
         data: formData,
-        result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"] },
+        result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"], detections: [], summary: "Standard protocol fallback due to analysis error." },
         status: 'Complete'
       };
       localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));

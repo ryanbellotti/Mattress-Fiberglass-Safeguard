@@ -29,3 +29,9 @@ export interface CleanupStep {
   description: string;
   isCompleted: boolean;
 }
+export interface AssessmentResult {
+  severity: "low" | "medium" | "high" | "extreme";
+  remediationPlan: string[];
+  detections: string[];
+  summary: string;
+}
