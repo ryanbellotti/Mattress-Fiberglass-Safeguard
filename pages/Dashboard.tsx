@@ -2,43 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap, ExternalLink, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CLEANUP_PROTOCOLS } from '../data/cleanupProtocols';
 
 const MotionDiv = motion.div as any;
 
 const Dashboard: React.FC = () => {
   const [assessment, setAssessment] = useState<any>(null);
-  const [progress, setProgress] = useState(0);
-  const [completedCount, setCompletedCount] = useState(0);
-  const [totalSteps, setTotalSteps] = useState(0);
   
   useEffect(() => {
-    // Load Assessment
     const data = localStorage.getItem('safeguard_assessment');
-    if (data) {
-      const parsed = JSON.parse(data);
-      setAssessment(parsed);
-      
-      // Determine Total Steps based on Severity
-      const severity = parsed.result?.severity?.toLowerCase().includes('high') ? 'severe' : 
-                       parsed.result?.severity?.toLowerCase().includes('medium') ? 'moderate' : 'mild';
-      const protocolTotal = CLEANUP_PROTOCOLS[severity as keyof typeof CLEANUP_PROTOCOLS]?.steps.length || 12;
-      setTotalSteps(protocolTotal);
-    }
-
-    // Load Progress
-    const savedProgress = localStorage.getItem('cleanup_progress_v2');
-    if (savedProgress) {
-      const completed = JSON.parse(savedProgress);
-      setCompletedCount(completed.length);
-    }
+    if (data) setAssessment(JSON.parse(data));
   }, []);
-
-  useEffect(() => {
-    if (totalSteps > 0) {
-      setProgress(Math.round((completedCount / totalSteps) * 100));
-    }
-  }, [completedCount, totalSteps]);
 
   const getSeverityColor = (s: string) => {
     switch(s?.toLowerCase()) {
@@ -68,7 +41,7 @@ const Dashboard: React.FC = () => {
     {
       category: "Community & Reporting",
       links: [
-        { label: "Facebook Support Group", url: "https://facebook.com/donotremovethecover", sub: "Join Community" },
+        { label: "Facebook Support Group", url: "#", sub: "Join Community" },
         { label: "SaferProducts.gov", url: "https://saferproducts.gov", sub: "Report Incident" }
       ]
     }
@@ -81,10 +54,7 @@ const Dashboard: React.FC = () => {
           <h1 className="text-4xl font-display tracking-wide text-white uppercase">My Command Center</h1>
           <p className="text-muted text-sm mt-1">Welcome back{assessment?.data?.name ? `, ${assessment.data.name}` : ''}</p>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-bold text-muted uppercase tracking-widest">Case ID: {assessment ? '883-XC' : 'N/A'}</p>
-          <p className="text-[10px] text-primary font-bold uppercase mt-1">Brought to you by MFSAG</p>
-        </div>
+        <p className="text-xs font-bold text-muted uppercase tracking-widest">Case ID: {assessment ? '883-XC' : 'N/A'}</p>
       </div>
 
       {!assessment ? (
@@ -115,20 +85,20 @@ const Dashboard: React.FC = () => {
              <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-6 border-l-4 border-accent relative overflow-hidden">
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Overall Progress</p>
                 <div className="flex items-end gap-2 relative z-10">
-                   <p className="text-4xl font-display text-accent">{completedCount}</p>
-                   <p className="text-xs font-bold text-accent mb-1 uppercase">/ {totalSteps} Steps</p>
+                   <p className="text-4xl font-display text-accent">16</p>
+                   <p className="text-xs font-bold text-accent mb-1 uppercase">Steps Completed</p>
                 </div>
                 <div className="w-full h-2 bg-white/10 rounded-full mt-3 overflow-hidden">
                    <MotionDiv 
                      initial={{ width: 0 }}
-                     animate={{ width: `${progress}%` }}
+                     animate={{ width: "64%" }}
                      transition={{ duration: 1, delay: 0.5 }}
                      className="h-full bg-accent relative"
                    >
                       <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 animate-pulse" />
                    </MotionDiv>
                 </div>
-                <p className="text-[9px] text-right mt-1 text-muted">{progress}% COMPLETION</p>
+                <p className="text-[9px] text-right mt-1 text-muted">64% TOTAL COMPLETION</p>
              </MotionDiv>
 
              <MotionDiv initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card p-6 border-l-4 border-danger">
