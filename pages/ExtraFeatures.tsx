@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const EducationHub: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
@@ -19,6 +17,12 @@ export const EducationHub: React.FC = () => {
   const handleDeepDive = async (topic: string) => {
     setIsLoading(true);
     try {
+        const apiKey = process.env.API_KEY;
+        if (!apiKey) {
+             setActiveAnalysis("API Key is missing. Please configure it.");
+             return;
+        }
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: `Explain "${topic}" in the context of mattress fiberglass safety. Keep it concise (under 100 words) but highly technical and accurate.`
@@ -88,6 +92,12 @@ export const CommunityForum: React.FC = () => {
   const generateDraft = async () => {
       setIsDrafting(true);
       try {
+        const apiKey = process.env.API_KEY;
+        if (!apiKey) {
+             setAiDraft("API Key is missing.");
+             return;
+        }
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: "Draft a short, empathetic, and clear forum post for someone who just discovered fiberglass in their mattress. They are scared and need advice. Ask for help."
@@ -208,9 +218,16 @@ export const ContactUs: React.FC = () => {
   );
 };
 
-export const OrganizationResources = () => (
-  <div className="max-w-4xl mx-auto py-10 px-4 text-center">
-     <h1 className="text-4xl font-display text-white uppercase mb-6">Official Repository</h1>
-     <iframe src="https://mattressfiberglass.org" className="w-full h-[800px] rounded-3xl border border-white/10 bg-white" title="Official Site"></iframe>
-  </div>
-);
+export const OrganizationResources = () => {
+  return (
+    <div className="max-w-4xl mx-auto py-10 px-4 text-center">
+       <h1 className="text-4xl font-display text-white uppercase mb-6">Official Repository</h1>
+       <div className="w-full h-[800px] rounded-3xl border border-white/10 bg-white relative">
+         <iframe src="https://mattressfiberglass.org" className="w-full h-full rounded-3xl" title="Official Site" />
+         <div className="absolute bottom-4 left-0 right-0 text-black text-xs">
+           <a href="https://mattressfiberglass.org" target="_blank" rel="noopener noreferrer" className="underline font-bold">Open in new tab</a> if content fails to load.
+         </div>
+       </div>
+    </div>
+  );
+};
