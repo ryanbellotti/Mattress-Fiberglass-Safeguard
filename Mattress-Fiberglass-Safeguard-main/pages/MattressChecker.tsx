@@ -2,18 +2,9 @@ import React, { useState } from 'react';
 import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2, ShieldCheck, Database } from 'lucide-react';
 import { checkBrandWithSearch } from '../services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MATTRESS_DB } from '../data/mattressDb';
 
 const MotionDiv = motion.div as any;
-
-// Sample data derived from the provided CSV for instant hits
-const LOCAL_DATABASE = [
-  { brand: "Tulo", risk: "high", fg: true },
-  { brand: "Zinus", risk: "medium", fg: false }, // Post-2024
-  { brand: "Linenspa", risk: "high", fg: true },
-  { brand: "Purple", risk: "none", fg: false },
-  { brand: "Tempur-Pedic", risk: "medium", fg: true },
-  { brand: "Casper", risk: "low", fg: false }
-];
 
 const MattressChecker: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -29,7 +20,7 @@ const MattressChecker: React.FC = () => {
 
     try {
       // Logic: Check local first for "Instant Discovery", then fall back to Search Grounding
-      const localMatch = LOCAL_DATABASE.find(item => item.brand.toLowerCase().includes(query.toLowerCase()));
+      const localMatch = MATTRESS_DB.find(item => item.brand.toLowerCase().includes(query.toLowerCase()));
       
       const data = await checkBrandWithSearch(query);
       
