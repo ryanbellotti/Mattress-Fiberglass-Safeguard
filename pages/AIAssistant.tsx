@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Send, Sparkles, User, Bot, Loader2, Search, ExternalLink, 
-  Bookmark, Trash2, History, Shield, Brain, Globe, 
+import {
+  Send, Sparkles, User, Bot, Loader2, Search, ExternalLink,
+  Bookmark, Trash2, History, Shield, Brain, Globe,
   FileText, Zap, ChevronRight, ClipboardList, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,7 +69,7 @@ const AIAssistant: React.FC = () => {
       }));
 
       // Remove the last message (current user msg) as it is passed as the 'message' arg to the function
-      // but sendAdvancedChatMessage usually appends it. Let's send history excluding the very last one 
+      // but sendAdvancedChatMessage usually appends it. Let's send history excluding the very last one
       // if the service expects (history, currentMsg).
       const historyForService = history.slice(0, -1);
 
@@ -117,7 +117,7 @@ const AIAssistant: React.FC = () => {
               <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Case ID: {Date.now().toString().slice(-6)}</p>
             </div>
           </div>
-          
+
           <div className="flex p-1 bg-black/40 rounded-xl">
             {(['evidence', 'sources', 'protocols'] as SidebarTab[]).map(tab => (
               <button
@@ -143,18 +143,18 @@ const AIAssistant: React.FC = () => {
               </div>
             ) : (
               notes.map((note) => (
-                <MotionDiv 
+                <MotionDiv
                   layout
-                  initial={{ opacity: 0, scale: 0.95 }} 
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  key={note.id} 
+                  key={note.id}
                   className="p-4 bg-white/5 rounded-2xl border border-white/5 text-[11px] leading-relaxed relative group hover:border-primary/30 transition-all"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className="bg-primary/20 text-primary px-2 py-0.5 rounded text-[8px] font-bold uppercase">{note.type}</span>
-                    <button 
+                    <button
                       onClick={() => {
-                        const n = notes.filter(x => x.id !== note.id); 
+                        const n = notes.filter(x => x.id !== note.id);
                         setNotes(n);
                         localStorage.setItem('fiberglass_vault_notes', JSON.stringify(n));
                       }}
@@ -168,15 +168,15 @@ const AIAssistant: React.FC = () => {
               ))
             )
           )}
-          
+
           {activeTab === 'sources' && (
             <div className="space-y-3">
                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-4">Live Discovery Links</p>
                {messages.flatMap(m => m.sources || []).map((src: any, idx) => (
-                 <a 
-                  key={idx} 
-                  href={src.uri} 
-                  target="_blank" 
+                 <a
+                  key={idx}
+                  href={src.uri}
+                  target="_blank"
                   className="block p-3 bg-accent/5 border border-accent/10 rounded-xl hover:bg-accent/10 transition-colors"
                  >
                    <p className="text-accent text-[10px] font-bold uppercase truncate">{src.title || 'Nexus Source'}</p>
@@ -207,7 +207,7 @@ const AIAssistant: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="h-10 px-4 flex items-center gap-2 bg-black/40 border border-white/5 rounded-xl">
                <div className="w-2 h-2 rounded-full bg-success animate-ping" />
@@ -230,26 +230,26 @@ const AIAssistant: React.FC = () => {
                 }`}>
                   {msg.role === 'user' ? <User size={28} /> : <Bot size={28} />}
                 </div>
-                
+
                 <div className={`max-w-[80%] space-y-4`}>
                   <div className={`p-6 rounded-[2rem] text-sm leading-relaxed shadow-xl ${
-                    msg.role === 'user' 
-                      ? 'bg-primary text-white rounded-tr-none' 
+                    msg.role === 'user'
+                      ? 'bg-primary text-white rounded-tr-none'
                       : 'bg-white/5 text-gray-200 rounded-tl-none border border-white/5 backdrop-blur-sm'
                   }`}>
                     {msg.text.split('\n').map((line, i) => (
                       <p key={i} className="mb-3 last:mb-0">{line}</p>
                     ))}
-                    
+
                     {msg.role === 'model' && (
                       <div className="mt-6 pt-4 border-t border-white/10 flex gap-4">
-                        <button 
+                        <button
                           onClick={() => saveNote(msg.text, 'Evidence')}
                           className="text-[9px] uppercase font-bold text-primary hover:text-white flex items-center gap-1.5 transition-colors"
                         >
                           <Bookmark size={12} /> Log as Evidence
                         </button>
-                        <button 
+                        <button
                           onClick={() => saveNote(msg.text, 'Cleanup')}
                           className="text-[9px] uppercase font-bold text-accent hover:text-white flex items-center gap-1.5 transition-colors"
                         >
@@ -265,10 +265,10 @@ const AIAssistant: React.FC = () => {
                         <Info size={10} /> Verified Grounding Sources:
                       </p>
                       {msg.sources.map((src: any, i: number) => (
-                        <a 
-                          key={i} 
-                          href={src.uri} 
-                          target="_blank" 
+                        <a
+                          key={i}
+                          href={src.uri}
+                          target="_blank"
                           className="bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-xl text-[9px] font-bold text-accent flex items-center gap-2 transition-all"
                         >
                           {src.title || "Nexus Data Point"} <ExternalLink size={10} />
@@ -289,7 +289,7 @@ const AIAssistant: React.FC = () => {
               <div className="bg-white/5 p-6 rounded-[2rem] rounded-tl-none border border-white/10 flex items-center gap-6 backdrop-blur-md">
                 <div className="flex gap-2">
                   {[...Array(3)].map((_, i) => (
-                    <MotionDiv 
+                    <MotionDiv
                       key={i}
                       animate={{ scaleY: [1, 2, 1], opacity: [0.3, 1, 0.3] }}
                       transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
@@ -311,7 +311,7 @@ const AIAssistant: React.FC = () => {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex flex-wrap justify-center gap-3">
               {directives.map((d, i) => (
-                <button 
+                <button
                   key={i}
                   onClick={() => handleSend(d.prompt)}
                   className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-muted hover:text-white hover:border-primary/50 transition-all flex items-center gap-2 group"
