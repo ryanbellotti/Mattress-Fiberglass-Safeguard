@@ -98,9 +98,10 @@ const MattressChecker: React.FC = () => {
 
     try {
       // Logic: Check local first for "Instant Discovery", then fall back to Search Grounding
+      const lowerQuery = query.toLowerCase();
       const localMatch = LOCAL_DATABASE.find(item => 
-        item.brand.toLowerCase().includes(query.toLowerCase()) || 
-        (item.model && item.model.toLowerCase().includes(query.toLowerCase()))
+        item.brand.toLowerCase().includes(lowerQuery) ||
+        (item.model && item.model.toLowerCase().includes(lowerQuery))
       );
       
       if (localMatch) {
