@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Activity, Shield, AlertTriangle, CheckCircle, ArrowRight, FileText, Zap, ExternalLink, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CLEANUP_PROTOCOLS } from '../data/cleanupProtocols';
+import { getSeverityColor } from '../utils/severityUtils';
 
 const MotionDiv = motion.div as any;
 
@@ -39,14 +40,6 @@ const Dashboard: React.FC = () => {
       setProgress(Math.round((completedCount / totalSteps) * 100));
     }
   }, [completedCount, totalSteps]);
-
-  const getSeverityColor = (s: string) => {
-    switch(s?.toLowerCase()) {
-      case 'high': case 'extreme': return 'text-danger';
-      case 'medium': return 'text-yellow-500';
-      default: return 'text-success';
-    }
-  };
 
   const RESOURCES = [
     {
