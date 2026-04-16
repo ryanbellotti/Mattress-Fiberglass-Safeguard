@@ -22,6 +22,7 @@ const Assessment: React.FC = () => {
   });
 
   const [aiResult, setAiResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const symptomOptions = ["Skin Rashes", "Respiratory Issues", "Eye Irritation", "Persistent Cough", "Sore Throat", "Itching"];
   const areaOptions = ["Bedroom", "Living Room", "HVAC Vents", "Clothing", "Entire Home"];
@@ -45,6 +46,7 @@ const Assessment: React.FC = () => {
 
   const runNeuralDiagnostic = async () => {
     setIsAnalyzing(true);
+    setError(null);
     try {
       const prompt = `Analyze this mattress fiberglass exposure case:
       User: ${formData.name} in ${formData.location}
@@ -69,17 +71,9 @@ const Assessment: React.FC = () => {
       localStorage.setItem('safeguard_assessment', JSON.stringify(assessmentData));
       
       setStep(4);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      // Fallback save even on error for demo purposes
-      const fallbackData = {
-        date: new Date().toISOString(),
-        data: formData,
-        result: { severity: formData.coverRemoved ? 'high' : 'medium', remediationPlan: ["Secure Area", "Do Not Disturb", "Contact Pro", "Wear PPE"] },
-        status: 'Complete'
-      };
-      localStorage.setItem('safeguard_assessment', JSON.stringify(fallbackData));
-      setStep(4);
+      setError(e.message || "An error occurred during diagnostic analysis. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -289,9 +283,17 @@ const Assessment: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Error Message */}
+      {error && step === 3 && (
+        <div className="p-4 mb-6 bg-danger/10 border border-danger/30 rounded-xl flex items-center gap-4">
+          <AlertTriangle className="text-danger shrink-0" size={24} />
+          <p className="text-sm text-red-400 font-bold">{error}</p>
+        </div>
+      )}
+
       {/* Navigation Controls */}
       {step < 4 && (
-        <div className="flex justify-between items-center mt-12">
+        <div className="flex justify-between items-center mt-6">
           <button 
             onClick={handleBack} 
             disabled={step === 1 || isAnalyzing}
