@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, AlertTriangle, Shield, CheckCircle2, User, MapPin, Activity, ClipboardList, Loader2, Sparkles } from 'lucide-react';
-import { analyzeSafetyMedia } from '../services/geminiService';
+import { analyzeSafetyMedia } from '@/services/geminiService';
 import { useNavigate } from 'react-router-dom';
 
 const MotionDiv = motion.div as any;

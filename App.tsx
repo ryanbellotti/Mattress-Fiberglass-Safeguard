@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import NavBar from './components/NavBar';
-import Welcome from './pages/Welcome';
-import Dashboard from './pages/Dashboard';
-import AIAssistant from './pages/AIAssistant';
-import MattressChecker from './pages/MattressChecker';
-import CleanupGuide from './pages/CleanupGuide';
-import Visualizer from './components/Visualizer';
-import LiveExpert from './pages/LiveExpert';
-import SafetyLab from './pages/SafetyLab';
-import Assessment from './pages/Assessment';
-import Resources from './pages/Resources';
-import DisclaimerModal from './components/DisclaimerModal';
-import { EducationHub, CommunityForum, ReportIncident, ContactUs, OrganizationResources } from './pages/ExtraFeatures';
+import NavBar from '@/components/NavBar';
+import Welcome from '@/pages/Welcome';
+import Dashboard from '@/pages/Dashboard';
+import AIAssistant from '@/pages/AIAssistant';
+import MattressChecker from '@/pages/MattressChecker';
+import CleanupGuide from '@/pages/CleanupGuide';
+import Visualizer from '@/components/Visualizer';
+import LiveExpert from '@/pages/LiveExpert';
+import SafetyLab from '@/pages/SafetyLab';
+import Assessment from '@/pages/Assessment';
+import Resources from '@/pages/Resources';
+import DisclaimerModal from '@/components/DisclaimerModal';
+import { EducationHub, CommunityForum, ReportIncident, ContactUs, OrganizationResources } from '@/pages/ExtraFeatures';
 
 const App: React.FC = () => {
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);

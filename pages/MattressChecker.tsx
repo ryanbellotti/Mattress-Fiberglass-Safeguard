@@ -1,87 +1,18 @@
 import React, { useState } from 'react';
 import { Search, AlertTriangle, CheckCircle, HelpCircle, ExternalLink, Loader2, ShieldCheck, Database } from 'lucide-react';
-import { checkBrandWithSearch } from '../services/geminiService';
+import { checkBrandWithSearch } from '@/services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MotionDiv = motion.div as any;
 
-// Sample data derived from the provided export
+// Sample data derived from the provided CSV for instant hits
 const LOCAL_DATABASE = [
-  { brand: "Tulo", model: "", risk: "high", fg: true, history: "Known to use fiberglass" },
-  { brand: "Sunrising Bedding", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Zoma", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Zenhaven", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Tempur-Pedic", model: "", risk: "medium", fg: true, history: "Uses woven silica yarn" },
-  { brand: "Vesgantti", model: "", risk: "high", fg: true, history: "Multiple credible consumer complaints" },
-  { brand: "Subrtex", model: "", risk: "high", fg: true, history: "Consumer reports suggest fiberglass" },
-  { brand: "Vibe", model: "", risk: "medium", fg: false, history: "Models before March 2023 contained fiberglass" },
-  { brand: "Wayfair Sleep", model: "", risk: "high", fg: true, history: "High number of consumer reports" },
-  { brand: "WinkBeds", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Sweetnight", model: "", risk: "medium", fg: true, history: "Extensive consumer reports" },
-  { brand: "Tuft & Needle Nod", model: "", risk: "high", fg: true, history: "Confirmed to contain fiberglass" },
-  { brand: "Tuft & Needle", model: "Main Lines", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Zinus", model: "", risk: "medium", fg: false, history: "Older models extensively used fiberglass; Phasing out post-2024" },
-  { brand: "Zinus", model: "Green Tea Memory Foam", risk: "high", fg: true, history: "Subject of major lawsuits" },
-  { brand: "Casper", model: "", risk: "low", fg: false, history: "Discontinued Nova Hybrid contained fiberglass" },
-  { brand: "Douglas (US)", model: "", risk: "high", fg: true, history: "Confirmed to contain fiberglass" },
-  { brand: "Mainstays (Walmart)", model: "", risk: "high", fg: true, history: "Confirmed to use fiberglass" },
-  { brand: "Allswell (Walmart)", model: "", risk: "high", fg: true, history: "Confirmed to contain fiberglass" },
-  { brand: "Molecule Mattress", model: "", risk: "medium", fg: true, history: "Confirmed to have used fiberglass" },
-  { brand: "Brooklyn Bedding", model: "All Models", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Full Moon Mattress (US)", model: "", risk: "high", fg: true, history: "Known to contain fiberglass" },
-  { brand: "Novaform", model: "", risk: "low", fg: false, history: "Original collections contained fiberglass; post-2024 free" },
-  { brand: "Siena", model: "", risk: "low", fg: false, history: "Earliest versions had fiberglass" },
-  { brand: "Eight Sleep", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Sleep Innovations", model: "", risk: "high", fg: true, history: "Confirmed to use fiberglass" },
-  { brand: "Sleep Number", model: "", risk: "low", fg: false, history: "Older models may have contained fiberglass" },
-  { brand: "Sleepy's", model: "", risk: "medium", fg: true, history: "Mixed and unclear history" },
-  { brand: "Lucid", model: "", risk: "high", fg: true, history: "Widely reported to contain fiberglass" },
-  { brand: "Olee Sleep", model: "", risk: "high", fg: true, history: "Consumer reports confirm fiberglass" },
-  { brand: "GhostBed", model: "", risk: "low", fg: false, history: "Early models had reports" },
-  { brand: "Linenspa", model: "", risk: "high", fg: true, history: "Notorious for containing fiberglass" },
-  { brand: "Puffy", model: "", risk: "low", fg: false, history: "Discontinued models contained fiberglass" },
-  { brand: "Bear Mattress", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Birch", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Home Life", model: "", risk: "medium", fg: false, history: "Older models contained fiberglass" },
-  { brand: "Bedstory", model: "", risk: "medium", fg: true, history: "Frequently cited in consumer complaints" },
-  { brand: "Avenco Hybrid", model: "", risk: "high", fg: true, history: "Numerous consumer reports" },
-  { brand: "Ashley Furniture", model: "Chime", risk: "high", fg: true, history: "Chime Series contains fiberglass" },
-  { brand: "DreamCloud", model: "", risk: "low", fg: false, history: "Early reports existed" },
-  { brand: "Purple", model: "", risk: "none", fg: false, history: "Never used woven fiberglass" },
-  { brand: "Classic Brands", model: "", risk: "high", fg: true, history: "Confirmed to use fiberglass" },
-  { brand: "Lull", model: "", risk: "low", fg: false, history: "Some early models had reports" },
-  { brand: "Serta", model: "", risk: "low", fg: false, history: "Older models used fiberglass" },
-  { brand: "Loom & Leaf", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Novilla", model: "", risk: "high", fg: true, history: "Many consumer reports" },
-  { brand: "NapQueen", model: "", risk: "high", fg: true, history: "Multiple consumer reports" },
-  { brand: "Avocado", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Awara", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "IKEA", model: "", risk: "low", fg: false, history: "Only Amsosen model confirmed" },
-  { brand: "Emma", model: "", risk: "low", fg: false, history: "Older European models had issues" },
-  { brand: "Helix Sleep", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Big Fig", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Brentwood Home", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Layla", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Milliard", model: "", risk: "high", fg: true, history: "Consumer reports exist" },
-  { brand: "PrimaSleep", model: "", risk: "high", fg: true, history: "Reports of fiberglass" },
-  { brand: "Crystli", model: "", risk: "high", fg: true, history: "High number of consumer reports" },
-  { brand: "Amerisleep", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Nectar", model: "", risk: "none", fg: false, history: "Never used in current models" },
-  { brand: "Nest Bedding", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Posh & Lavish", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Silk & Snow (US)", model: "", risk: "high", fg: true, history: "Confirmed to contain fiberglass" },
-  { brand: "Best Price Mattress", model: "", risk: "high", fg: true, history: "Confirmed to contain fiberglass" },
-  { brand: "Saatva", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Sealy", model: "", risk: "medium", fg: true, history: "All-foam models often contain fiberglass" },
-  { brand: "Kingsdown", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Leesa", model: "", risk: "medium", fg: false, history: "Pre-2023 models contained fiberglass" },
-  { brand: "Perfect Cloud", model: "", risk: "high", fg: true, history: "Confirmed to have used fiberglass" },
-  { brand: "Stearns & Foster", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "Nolah", model: "", risk: "none", fg: false, history: "Never used fiberglass" },
-  { brand: "AmazonBasics", model: "", risk: "high", fg: true, history: "Widely reported by consumers" },
-  { brand: "Molblly", model: "", risk: "high", fg: true, history: "Confirmed by many consumers" },
-  { brand: "Beautyrest", model: "", risk: "low", fg: false, history: "Some older/budget models reported" },
-  { brand: "Kirkland Signature", model: "", risk: "none", fg: false, history: "Never used fiberglass" }
+  { brand: "Tulo", risk: "high", fg: true },
+  { brand: "Zinus", risk: "medium", fg: false }, // Post-2024
+  { brand: "Linenspa", risk: "high", fg: true },
+  { brand: "Purple", risk: "none", fg: false },
+  { brand: "Tempur-Pedic", risk: "medium", fg: true },
+  { brand: "Casper", risk: "low", fg: false }
 ];
 
 const MattressChecker: React.FC = () => {
@@ -98,20 +29,18 @@ const MattressChecker: React.FC = () => {
 
     try {
       // Logic: Check local first for "Instant Discovery", then fall back to Search Grounding
-      const localMatch = LOCAL_DATABASE.find(item => 
-        item.brand.toLowerCase().includes(query.toLowerCase()) || 
-        (item.model && item.model.toLowerCase().includes(query.toLowerCase()))
-      );
+      const localMatch = LOCAL_DATABASE.find(item => item.brand.toLowerCase().includes(query.toLowerCase()));
+
+      const data = await checkBrandWithSearch(query);
       
       if (localMatch) {
          setResult({
-           summary: `${localMatch.history}. Risk Level: ${localMatch.risk.toUpperCase()}.`,
+           ...data,
            riskLevel: localMatch.risk,
            containsFiberglass: localMatch.fg,
            isLocalMatch: true
          });
       } else {
-         const data = await checkBrandWithSearch(query);
          setResult(data);
       }
     } catch (error) {
@@ -136,7 +65,7 @@ const MattressChecker: React.FC = () => {
       <div className="text-center space-y-4">
         <h1 className="text-6xl font-display tracking-tight text-white uppercase">Brand Auditor</h1>
         <p className="text-muted text-sm max-w-xl mx-auto font-medium">
-          Verify safety profiles instantly. We merge our <span className="text-white font-bold">Local Repository (60+ Brands)</span> with <span className="text-accent font-bold">Gemini Live Search Grounding</span> to give you the final word on any mattress.
+          Verify safety profiles instantly. We merge our <span className="text-white font-bold">Local Repository</span> with <span className="text-accent font-bold">Gemini Live Search Grounding</span> to give you the final word on any mattress.
         </p>
       </div>
 
@@ -147,7 +76,7 @@ const MattressChecker: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Query brand or model name (e.g. Zinus, Nectar)..."
+              placeholder="Query brand or model name..."
               className="w-full neuro-inset px-8 py-5 text-lg bg-transparent text-white outline-none focus:ring-2 ring-primary/40 transition-all rounded-2xl"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted/30">
@@ -174,7 +103,7 @@ const MattressChecker: React.FC = () => {
           >
             {result.isLocalMatch && (
               <div className="absolute top-0 right-0 bg-accent/20 text-accent px-4 py-1.5 text-[10px] font-bold uppercase rounded-bl-xl border-b border-l border-accent/30">
-                 Verified Database Match
+                 Database Verified
               </div>
             )}
             
@@ -191,7 +120,7 @@ const MattressChecker: React.FC = () => {
               
               <div className="text-center md:text-right">
                 <span className={`text-7xl font-display tracking-tighter ${result.containsFiberglass ? 'text-danger' : 'text-success'}`}>
-                  {result.containsFiberglass ? 'POSITIVE' : 'NEGATIVE'}
+                  {result.containsFiberglass ? 'DETECTION' : 'NEGATIVE'}
                 </span>
                 <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-1">Fiberglass Presence Protocol</p>
               </div>
@@ -200,7 +129,7 @@ const MattressChecker: React.FC = () => {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="md:col-span-2 bg-white/5 rounded-3xl p-8 border border-white/5 shadow-inner">
                 <h3 className="text-[10px] font-bold text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Loader2 size={12} className="text-accent" /> Audit Summary
+                  <Loader2 size={12} className="text-accent" /> AI Audit Summary
                 </h3>
                 <p className="text-gray-300 leading-relaxed text-sm">{result.summary}</p>
               </div>
@@ -220,7 +149,7 @@ const MattressChecker: React.FC = () => {
                       </a>
                     ))
                   ) : (
-                    <p className="text-[10px] text-muted italic">Internal Database Record.</p>
+                    <p className="text-[10px] text-muted italic">No external grounding required.</p>
                   )}
                 </div>
               </div>

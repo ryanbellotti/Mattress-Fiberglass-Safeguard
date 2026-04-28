@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
-import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  BookOpen, Users, AlertCircle, Mail, Search, MessageSquare,
+  Send, CheckCircle2, Sparkles, Loader2, ShieldAlert, ExternalLink,
+  Heart, Share2, MoreHorizontal, User, Reply
+} from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -80,10 +84,100 @@ export const EducationHub: React.FC = () => {
   );
 };
 
+// --- FORUM TYPES & COMPONENTS ---
+
+interface Comment {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Post {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
+  likes: number;
+  comments: Comment[];
+  category: 'General' | 'Story' | 'Advice' | 'Emergency';
+}
+
 export const CommunityForum: React.FC = () => {
-  const [draftMode, setDraftMode] = useState(false);
-  const [aiDraft, setAiDraft] = useState("");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState('');
+  const [category, setCategory] = useState<Post['category']>('General');
   const [isDrafting, setIsDrafting] = useState(false);
+  const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
+  const [newComment, setNewComment] = useState('');
+
+  // Load posts from local storage on mount or seed with data
+  useEffect(() => {
+    const saved = localStorage.getItem('safeguard_forum_posts');
+    if (saved) {
+      setPosts(JSON.parse(saved));
+    } else {
+      setPosts([
+        {
+          id: '1',
+          author: 'Sarah J.',
+          text: 'Found shards in my daughter\'s room today. Verified with the flashlight test. We are evacuating to a hotel. Does anyone know a good abatement company in Chicago?',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          likes: 14,
+          comments: [
+            { id: 'c1', author: 'Mike_SafeGuard', text: 'Check the resources page for certified lists. Do not try to vacuum it yourself! Standard vacuums will spread it.', timestamp: new Date(Date.now() - 1800000).toISOString() }
+          ],
+          category: 'Emergency'
+        },
+        {
+          id: '2',
+          author: 'David K.',
+          text: 'Just realized my "Bamboo" mattress is actually 60% glass fiber. The tag was hidden under the zipper. Why is this legal?',
+          timestamp: new Date(Date.now() - 86400000).toISOString(),
+          likes: 32,
+          comments: [],
+          category: 'Story'
+        }
+      ]);
+    }
+  }, []);
+
+  // Persist posts
+  useEffect(() => {
+    localStorage.setItem('safeguard_forum_posts', JSON.stringify(posts));
+  }, [posts]);
+
+  const handlePost = () => {
+    if (!newPost.trim()) return;
+    const post: Post = {
+      id: Date.now().toString(),
+      author: 'Anonymous Survivor', // Placeholder for user system
+      text: newPost,
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      comments: [],
+      category
+    };
+    setPosts([post, ...posts]);
+    setNewPost('');
+  };
+
+  const handleLike = (id: string) => {
+    setPosts(posts.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p));
+  };
+
+  const handleComment = (postId: string) => {
+    if (!newComment.trim()) return;
+    const comment: Comment = {
+      id: Date.now().toString(),
+      author: 'You',
+      text: newComment,
+      timestamp: new Date().toISOString()
+    };
+    setPosts(posts.map(p => p.id === postId ? { ...p, comments: [...p.comments, comment] } : p));
+    setNewComment('');
+    setActiveCommentId(null); // Close comment input or keep open? Let's close for now or keep open to see result.
+  };
 
   const generateDraft = async () => {
       setIsDrafting(true);
@@ -92,7 +186,7 @@ export const CommunityForum: React.FC = () => {
             model: 'gemini-3-flash-preview',
             contents: "Draft a short, empathetic, and clear forum post for someone who just discovered fiberglass in their mattress. They are scared and need advice. Ask for help."
         });
-        setAiDraft(response.text || "");
+        setNewPost(response.text || "");
       } catch (e) {
           console.error(e);
       } finally {
@@ -100,43 +194,140 @@ export const CommunityForum: React.FC = () => {
       }
   };
 
+  const getCategoryColor = (cat: string) => {
+    switch(cat) {
+      case 'Emergency': return 'bg-danger/20 text-danger border-danger/50';
+      case 'Advice': return 'bg-success/20 text-success border-success/50';
+      case 'Story': return 'bg-primary/20 text-primary border-primary/50';
+      default: return 'bg-white/10 text-muted border-white/20';
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 text-center space-y-8">
-      <div className="space-y-2">
+    <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
+      <div className="text-center space-y-2">
         <h1 className="text-5xl font-display text-white uppercase tracking-tighter">Community Nexus</h1>
-        <p className="text-secondary text-xs font-bold uppercase tracking-[0.3em]">Connect with 20,000+ Survivors</p>
+        <p className="text-secondary text-xs font-bold uppercase tracking-[0.3em]">Connect, Share, Survive</p>
       </div>
 
-      <div className="glass-card p-12 space-y-6">
-        <Users size={64} className="mx-auto text-secondary" />
-        <h2 className="text-2xl text-white font-bold">The "Do Not Remove The Cover" Group</h2>
-        <p className="text-gray-300 max-w-xl mx-auto">
-          We partner directly with the largest advocacy group on Facebook. Share your story, get emotional support, and compare photos with thousands of others who understand exactly what you are going through.
-        </p>
-        <div className="flex justify-center gap-4">
-            <a 
-            href="https://facebook.com/donotremovethecover" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="neuro-btn bg-secondary text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2"
-            >
-            <MessageSquare size={20} /> JOIN DISCUSSION
-            </a>
-            <button 
-                onClick={() => { setDraftMode(!draftMode); if(!aiDraft) generateDraft(); }}
-                className="neuro-btn border border-white/10 text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2 hover:bg-white/5"
-            >
-                <Sparkles size={20} className={isDrafting ? "animate-spin" : ""} /> {draftMode ? "Close Assistant" : "AI Draft Helper"}
-            </button>
+      {/* Create Post Widget */}
+      <div className="glass-card p-6 space-y-4 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+        <div className="flex gap-4">
+           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 border border-primary/30">
+             <User size={20} />
+           </div>
+           <div className="flex-1 space-y-3">
+              <textarea
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                placeholder="Share your story or ask for help..."
+                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white placeholder-muted focus:ring-1 focus:ring-secondary/50 outline-none resize-none h-24 transition-all"
+              />
+              <div className="flex flex-wrap justify-between items-center gap-3">
+                 <div className="flex gap-2">
+                    {(['General', 'Story', 'Advice', 'Emergency'] as const).map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setCategory(c)}
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border transition-all ${category === c ? 'bg-secondary text-black border-secondary' : 'bg-transparent text-muted border-white/10 hover:border-white/30'}`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                 </div>
+                 <div className="flex gap-2">
+                    <button
+                      onClick={generateDraft}
+                      disabled={isDrafting}
+                      className="text-xs font-bold text-accent flex items-center gap-2 hover:text-white transition-colors bg-accent/10 px-3 py-1.5 rounded-lg border border-accent/20"
+                    >
+                      <Sparkles size={14} className={isDrafting ? "animate-spin" : ""} /> {isDrafting ? 'Drafting...' : 'AI Assist'}
+                    </button>
+                    <button
+                      onClick={handlePost}
+                      disabled={!newPost.trim()}
+                      className="neuro-btn bg-primary text-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:scale-105 transition-transform disabled:opacity-50"
+                    >
+                      <Send size={14} /> POST
+                    </button>
+                 </div>
+              </div>
+           </div>
         </div>
+      </div>
 
-        {draftMode && (
-            <div className="text-left bg-black/40 p-6 rounded-2xl border border-white/10 mt-6">
-                <p className="text-[10px] text-muted uppercase font-bold tracking-widest mb-2">Gemini Generated Draft:</p>
-                <p className="text-sm text-gray-300 italic mb-4">{aiDraft}</p>
-                <button className="text-xs text-secondary font-bold uppercase" onClick={() => navigator.clipboard.writeText(aiDraft)}>Copy to Clipboard</button>
-            </div>
-        )}
+      {/* Feed */}
+      <div className="space-y-4">
+        {posts.map(post => (
+          <div key={post.id} className="glass-card p-6 hover:border-white/20 transition-all">
+             <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm bg-white/10 border border-white/5`}>
+                      {post.author[0]}
+                   </div>
+                   <div>
+                      <p className="text-sm font-bold text-white">{post.author}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${getCategoryColor(post.category)}`}>{post.category}</span>
+                        <span className="text-[10px] text-muted">{new Date(post.timestamp).toLocaleDateString()}</span>
+                      </div>
+                   </div>
+                </div>
+                <MoreHorizontal size={16} className="text-muted cursor-pointer hover:text-white" />
+             </div>
+
+             <p className="text-gray-300 text-sm leading-relaxed mb-6 whitespace-pre-wrap">{post.text}</p>
+
+             <div className="flex items-center gap-6 border-t border-white/5 pt-4">
+                <button onClick={() => handleLike(post.id)} className="flex items-center gap-2 text-xs font-bold text-muted hover:text-danger transition-colors group">
+                   <Heart size={16} className={`group-hover:fill-danger ${post.likes > 0 ? 'fill-danger text-danger' : ''}`} /> {post.likes}
+                </button>
+                <button onClick={() => setActiveCommentId(activeCommentId === post.id ? null : post.id)} className="flex items-center gap-2 text-xs font-bold text-muted hover:text-primary transition-colors">
+                   <MessageSquare size={16} /> {post.comments.length} Comments
+                </button>
+                <button className="flex items-center gap-2 text-xs font-bold text-muted hover:text-white transition-colors ml-auto">
+                   <Share2 size={16} /> Share
+                </button>
+             </div>
+
+             {/* Comments Section */}
+             {activeCommentId === post.id && (
+                <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-in slide-in-from-top-2">
+                   {post.comments.length > 0 && post.comments.map(comment => (
+                      <div key={comment.id} className="flex gap-3 pl-4 border-l-2 border-white/10">
+                         <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-muted shrink-0">
+                            {comment.author[0]}
+                         </div>
+                         <div className="space-y-1">
+                            <div className="flex items-baseline gap-2">
+                                <p className="text-xs font-bold text-white">{comment.author}</p>
+                                <span className="text-[9px] text-muted">{new Date(comment.timestamp).toLocaleDateString()}</span>
+                            </div>
+                            <p className="text-xs text-gray-400">{comment.text}</p>
+                         </div>
+                      </div>
+                   ))}
+
+                   <div className="flex gap-2 mt-4">
+                      <input
+                        type="text"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleComment(post.id)}
+                        placeholder="Write a supportive reply..."
+                        className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-primary/50 placeholder-muted"
+                      />
+                      <button
+                        onClick={() => handleComment(post.id)}
+                        className="p-2 bg-primary/20 rounded-lg text-primary hover:bg-primary/30 border border-primary/30 transition-colors"
+                      >
+                        <Send size={14} />
+                      </button>
+                   </div>
+                </div>
+             )}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -157,31 +348,84 @@ export const ReportIncident: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 space-y-8">
+    <div className="max-w-6xl mx-auto py-10 px-4 space-y-12">
       <div className="text-center space-y-2">
-        <h1 className="text-5xl font-display text-white uppercase tracking-tighter">Incident Registry</h1>
-        <p className="text-danger text-xs font-bold uppercase tracking-[0.3em]">Official Data Collection</p>
+        <h1 className="text-5xl font-display text-white uppercase tracking-tighter">Incident Command</h1>
+        <p className="text-danger text-xs font-bold uppercase tracking-[0.3em]">Submit Data & Notify Federal Authorities</p>
       </div>
 
-      <div className="glass-card p-10 space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted uppercase">Brand Name</label>
-            <input type="text" className="w-full neuro-inset p-3 rounded-lg text-white outline-none" placeholder="e.g. Zinus" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted uppercase">Purchase Year</label>
-            <input type="text" className="w-full neuro-inset p-3 rounded-lg text-white outline-none" placeholder="e.g. 2019" />
-          </div>
+      <div className="grid lg:grid-cols-2 gap-12 items-start">
+
+        {/* SECTION 1: USER FORM (Requested First) */}
+        <div className="flex flex-col items-center space-y-4">
+             <div className="glass-card p-2 bg-white rounded-[3rem] border-8 border-surface shadow-2xl relative">
+                {/* iPhone-like Frame Element */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-surface rounded-b-2xl z-10"></div>
+                <iframe
+                    id="JotFormIFrame-253007406534147"
+                    title="Mattress Fiberglass Leak Report"
+                    allow="geolocation; microphone; camera"
+                    src="https://www.jotform.com/app/253007406534147?appEmbedded=1"
+                    style={{ height: '700px', width: '375px', border: 'none', borderRadius: '2rem' }}
+                />
+             </div>
+             <p className="text-xs text-muted uppercase tracking-widest mt-4">SafeGuard Internal Advocate Registry</p>
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-muted uppercase">Incident Description</label>
-          <textarea className="w-full neuro-inset p-3 rounded-lg text-white outline-none h-32" placeholder="Describe how contamination occurred..." />
+
+        {/* SECTION 2: FEDERAL REPORT (Predominant & Important) */}
+        <div className="space-y-8 lg:sticky lg:top-24">
+            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-danger/20 to-danger/5 border border-danger/30 relative overflow-hidden shadow-[0_0_50px_rgba(244,63,94,0.15)]">
+                <div className="absolute top-0 right-0 p-8 opacity-10 text-danger">
+                    <ShieldAlert size={140} />
+                </div>
+
+                <div className="relative z-10 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-danger text-white text-[10px] font-bold uppercase tracking-widest">
+                        <AlertCircle size={12} /> Federal Action Required
+                    </div>
+
+                    <h2 className="text-4xl font-display text-white uppercase leading-[0.9]">
+                        File a CPSC Complaint <span className="text-danger">Immediately</span>
+                    </h2>
+
+                    <p className="text-gray-200 text-sm leading-relaxed font-medium">
+                        While our internal form collects data for advocacy, filing with <strong>SaferProducts.gov</strong> is the <span className="text-white underline decoration-danger underline-offset-4">only legal mechanism</span> that forces the U.S. Government to investigate and issue recalls.
+                    </p>
+
+                    <div className="space-y-4 bg-black/20 p-6 rounded-2xl border border-white/5">
+                        <h3 className="text-xs font-bold text-white uppercase tracking-widest border-b border-white/10 pb-2 mb-2">Why This Is Critical</h3>
+                        <ul className="space-y-3">
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Creates a permanent federal record manufacturers cannot delete.</span>
+                            </li>
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Triggers automatic investigation algorithms at the CPSC.</span>
+                            </li>
+                            <li className="flex items-start gap-3 text-xs text-gray-300">
+                                <CheckCircle2 size={14} className="text-danger shrink-0 mt-0.5" />
+                                <span>Publicly warns other families via the national database.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <a
+                        href="https://www.saferproducts.gov/IncidentEntry"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group w-full py-5 rounded-2xl bg-danger hover:bg-red-500 text-white font-bold text-lg uppercase tracking-wide flex items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                    >
+                        Launch Federal Report <ExternalLink size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </a>
+
+                    <p className="text-[10px] text-center text-white/40 uppercase tracking-widest">
+                        Redirects to SaferProducts.gov (Official US Govt Site)
+                    </p>
+                </div>
+            </div>
         </div>
-        <button onClick={() => setSubmitted(true)} className="w-full neuro-btn bg-danger text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-          <AlertCircle size={20} /> SUBMIT TO REGISTRY
-        </button>
-        <p className="text-xs text-center text-muted">Data is aggregated for regulatory complaints to CPSC.</p>
+
       </div>
     </div>
   );

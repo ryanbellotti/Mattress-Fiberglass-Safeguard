@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Image as ImageIcon, Wand2, Download, Loader2, Sparkles, Sliders, AlertTriangle } from 'lucide-react';
-import { generateSafetyGraphic } from '../services/geminiService';
+import { generateSafetyGraphic } from '@/services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MotionDiv = motion.div as any;

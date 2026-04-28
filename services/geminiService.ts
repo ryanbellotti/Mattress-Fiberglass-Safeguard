@@ -142,3 +142,80 @@ export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | 
     return null;
   }
 };
+
+export const generateSpeech = async (text: string) => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API Key Missing");
+    return null;
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text }] }],
+      config: {
+        responseModalities: [Modality.AUDIO]
+      }
+    });
+
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return part.inlineData.data;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Speech Generation Error:", error);
+    return null;
+  }
+};
+
+export const checkBrandWithSearch = async (query: string) => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API Key Missing");
+    throw new Error("API key is missing");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: [{ role: 'user', parts: [{ text: `Search for safety audits, lawsuits, and fiberglass contamination issues regarding: ${query}. Return a JSON summary.` }] }],
+      config: {
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            riskLevel: { type: Type.STRING, enum: ["high", "medium", "low", "none"] },
+            containsFiberglass: { type: Type.BOOLEAN },
+            summary: { type: Type.STRING }
+          },
+          required: ["riskLevel", "containsFiberglass", "summary"]
+        }
+      }
+    });
+
+    const data = JSON.parse(response.text || "{}");
+
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      ?.map((chunk: any) => chunk.web?.uri)
+      .filter((u: any) => u) || [];
+
+    return {
+      ...data,
+      sources
+    };
+  } catch (error) {
+    console.error("Brand Check Error:", error);
+    throw error;
+  }
+};

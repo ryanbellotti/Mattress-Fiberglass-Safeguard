@@ -5,8 +5,8 @@ import {
   FileText, Zap, ChevronRight, ClipboardList, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sendAdvancedChatMessage } from '../services/geminiService';
-import { ChatMessage } from '../types';
+import { sendAdvancedChatMessage } from '@/services/geminiService';
+import { ChatMessage } from '@/types';
 
 const MotionDiv = motion.div as any;
 
