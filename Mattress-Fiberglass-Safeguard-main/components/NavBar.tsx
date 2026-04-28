@@ -5,7 +5,7 @@ import {
   Camera, Shield, Phone, FileText, Users, AlertCircle, 
   Mail, BookOpen, Fingerprint, Wand2
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
 
 const NavBar: React.FC = () => {
   const location = useLocation();

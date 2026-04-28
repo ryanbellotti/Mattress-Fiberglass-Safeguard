@@ -110,7 +110,7 @@ const Visualizer: React.FC = () => {
       <div className="grid lg:grid-cols-2 gap-10">
         <div className="space-y-6">
           <div 
-            className={`glass-card border-2 h-[450px] flex flex-col items-center justify-center transition-all relative overflow-hidden ${media || isCameraOpen ? 'border-primary/30' : 'border-dashed border-white/10'}`}
+            className={`glass-card border-2 h-[450px] flex flex-col items-center justify-center transition-all relative overflow-hidden ${media || isCameraOpen ? 'border-primary/30' : 'border-das[...]`}
           >
             {isCameraOpen ? (
               <div className="relative w-full h-full bg-black">
@@ -119,7 +119,7 @@ const Visualizer: React.FC = () => {
                    <ScanLine className="text-primary w-full h-8 animate-pulse opacity-50 absolute top-1/2 -translate-y-1/2" />
                 </div>
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-10">
-                   <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transform" />
+                   <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transfor[...] />
                    <button onClick={stopCamera} className="w-12 h-12 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><X size={20} /></button>
                 </div>
               </div>
@@ -180,6 +180,12 @@ const Visualizer: React.FC = () => {
               </MotionDiv>
             ) : analysis && (
               <MotionDiv initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+                {analysis?.summary?.toLowerCase()?.includes('demo analysis') && (
+                  <div className="p-3 mb-4 rounded-md bg-yellow-900/20 border border-yellow-700 text-yellow-200 text-xs">
+                    Demo mode: No server-side API key is configured. Results are simulated. Deploy to Vercel and set API_KEY to enable real analysis.
+                  </div>
+                )}
+
                 <div className={`p-6 rounded-3xl border-2 flex items-center gap-6 ${
                   analysis.severity === 'extreme' || analysis.severity === 'high' ? 'bg-danger/10 border-danger shadow-[0_0_40px_rgba(244,63,94,0.2)]' : 'bg-primary/10 border-primary/40'
                 }`}>
