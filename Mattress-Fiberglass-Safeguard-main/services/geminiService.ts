@@ -45,8 +45,29 @@ export const sendAdvancedChatMessage = async (
 
 // Image/Video Understanding for the Scan page
 export const analyzeSafetyMedia = async (base64Data: string, mimeType: string, prompt: string) => {
+  // NOTE: For production you MUST call GenAI from a server-side endpoint that holds your API key.
   const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key Missing");
+
+  // If no API key is present (typical for client-side builds), run a demo fallback so the UI remains functional.
+  if (!apiKey) {
+    console.warn("API key not found — running analyzeSafetyMedia in demo mode (no external call).");
+    const demo = {
+      severity: 'medium',
+      detections: [
+        "Demo: Shiny flecks visible in flashlight area",
+        "Demo: Mattress law tag detected (uncertain text)",
+      ],
+      remediationPlan: [
+        "Isolate the mattress and avoid disturbing the cover",
+        "Use bright flashlight to document contamination",
+        "Contact a qualified remediation professional",
+        "Document and report the incident to SaferProducts.gov"
+      ],
+      summary: "Demo analysis: no API key configured. This is a simulated response — for real analysis, configure a server-side API key and proxy GenAI calls through your backend."
+    };
+    await new Promise(resolve => setTimeout(resolve, 700));
+    return demo;
+  }
   
   const ai = new GoogleGenAI({ apiKey });
   
@@ -118,78 +139,6 @@ export const generateSafetyGraphic = async (prompt: string, size: "1K" | "2K" | 
     return null;
   } catch (error) {
     console.error("Image Gen Error:", error);
-    return null;
-  }
-};
-
-// Search-grounded brand auditor
-export const checkBrandWithSearch = async (brandName: string) => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key Missing");
-
-  const ai = new GoogleGenAI({ apiKey });
-  
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: {
-        parts: [{ 
-          text: `Perform a safety audit for the mattress brand/model: "${brandName}". 
-          Is it known to contain fiberglass in its fire barrier? 
-          What is the risk level (High, Medium, or Low)?
-          Provide a concise summary of findings including recall status or known class action lawsuits.` 
-        }]
-      },
-      config: {
-        tools: [{ googleSearch: {} }],
-        systemInstruction: "You are Matt Russ Fyburs, the lead advocate at mattressfiberglass.org. Use precise technical safety data."
-      }
-    });
-
-    const text = response.text || "No data available.";
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk: any) => chunk.web?.uri)
-      .filter((u: any) => u) || [];
-
-    const lowerText = text.toLowerCase();
-    let riskLevel: 'high' | 'medium' | 'low' = 'low';
-    if (lowerText.includes('high risk') || lowerText.includes('unsafe')) riskLevel = 'high';
-    else if (lowerText.includes('medium risk') || lowerText.includes('moderate')) riskLevel = 'medium';
-
-    return {
-      riskLevel,
-      containsFiberglass: lowerText.includes('yes') || lowerText.includes('confirmed') || lowerText.includes('contains fiberglass'),
-      summary: text,
-      sources
-    };
-  } catch (error) {
-    console.error("Brand Audit Error:", error);
-    throw error;
-  }
-};
-
-// Audio synthesis
-export const generateSpeech = async (text: string) => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) return null;
-
-  const ai = new GoogleGenAI({ apiKey });
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Read following safety instruction: ${text}` }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Fenrir' },
-          },
-        },
-      },
-    });
-    return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
-  } catch (error) {
-    console.error("Speech Synthesis Error:", error);
     return null;
   }
 };
