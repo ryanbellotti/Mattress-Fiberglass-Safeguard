@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Video, Upload, Check, AlertTriangle, Loader2, PlayCircle, ShieldCheck, X, ScanLine, Search } from 'lucide-react';
-import { analyzeSafetyMedia } from '../services/geminiService';
+import { Camera, Video, Upload, Check, AlertTriangle, Loader2, PlayCircle, ShieldCheck, X, ScanLine } from 'lucide-react';
+import { analyzeSafetyMedia } from '@/services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MotionDiv = motion.div as any;
@@ -79,22 +79,14 @@ const Visualizer: React.FC = () => {
     setIsAnalyzing(true);
     setAnalysis(null);
     try {
-      // Enhanced prompt for specific fiberglass detection
-      const prompt = `Analyze this ${type.startsWith('video') ? 'video' : 'photo'} for mattress safety.
-      1. Look for specific text on mattress tags like "Glass Fiber", "Fiberglass", "Modacrylic", "Silica", or "Made in China" (often associated with fiberglass brands).
-      2. Look for "shimmering" or "sparkling" particles on surfaces, dark fabric, or skin, which indicates fiberglass contamination.
-      3. Identify if a mattress cover zipper is visible or open.
-      
-      Return a structured JSON with:
-      - severity (low, medium, high, extreme)
-      - detections (list of strings, e.g., "Shiny particles on flashlight beam", "Tag says 60% Glass Fiber")
-      - remediationPlan (4 actionable steps)
-      - summary (concise explanation)`;
+      const prompt = `Perform a high-level safety audit of this ${type.startsWith('video') ? 'video' : 'photo'}.
+      Identify any mattress tags, exposed fiberglass 'shimmer', or high-risk items in the room (carpets, soft toys, electronics).
+      Return a severity-based remediation plan. Focus on how fiberglass interacts with everything seen.`;
       
       const result = await analyzeSafetyMedia(base64, type, prompt);
       setAnalysis(result);
     } catch (error) {
-      alert("Analysis engine failure. Please try a different image.");
+      alert("Analysis engine failure.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -110,7 +102,7 @@ const Visualizer: React.FC = () => {
       <div className="grid lg:grid-cols-2 gap-10">
         <div className="space-y-6">
           <div 
-            className={`glass-card border-2 h-[450px] flex flex-col items-center justify-center transition-all relative overflow-hidden ${media || isCameraOpen ? 'border-primary/30' : 'border-das[...]`}
+            className={`glass-card border-2 h-[450px] flex flex-col items-center justify-center transition-all relative overflow-hidden ${media || isCameraOpen ? 'border-primary/30' : 'border-dashed border-white/10'}`}
           >
             {isCameraOpen ? (
               <div className="relative w-full h-full bg-black">
@@ -119,7 +111,7 @@ const Visualizer: React.FC = () => {
                    <ScanLine className="text-primary w-full h-8 animate-pulse opacity-50 absolute top-1/2 -translate-y-1/2" />
                 </div>
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-10">
-                   <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transfor[...] />
+                   <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-white border-4 border-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transform" />
                    <button onClick={stopCamera} className="w-12 h-12 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"><X size={20} /></button>
                 </div>
               </div>
@@ -139,7 +131,7 @@ const Visualizer: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-white font-bold uppercase">Upload Photo or Video</p>
-                  <p className="text-muted text-xs">Analyze tags, surfaces, or damage</p>
+                  <p className="text-muted text-xs">Analyze tags or contamination spread</p>
                 </div>
               </div>
             )}
@@ -151,13 +143,13 @@ const Visualizer: React.FC = () => {
               onClick={startCamera}
               className="neuro-btn py-4 text-xs font-bold text-white flex items-center justify-center gap-2 bg-primary/20 border border-primary/30 hover:bg-primary/30"
             >
-              <Camera size={16} /> SCAN OBJECT
+              <Camera size={16} /> SCAN ROOM
             </button>
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="neuro-btn py-4 text-xs font-bold text-white flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10"
             >
-              <Upload size={16} /> UPLOAD MEDIA
+              <Upload size={16} /> UPLOAD PHOTO OR VIDEO
             </button>
           </div>
         </div>
@@ -167,25 +159,18 @@ const Visualizer: React.FC = () => {
             {!media && !isCameraOpen ? (
               <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card opacity-40 grayscale">
                 <ShieldCheck size={64} className="mb-4 text-muted" />
-                <p className="text-sm font-bold uppercase tracking-widest">Waiting for Visual Input</p>
-                <p className="text-xs text-muted mt-2 max-w-xs">Upload a clear photo of your mattress law tag or a flashlight test on a dark surface.</p>
+                <p className="text-sm font-bold uppercase tracking-widest">Waiting for Input Data</p>
               </MotionDiv>
             ) : isAnalyzing ? (
               <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col items-center justify-center text-center p-12 glass-card">
                 <Loader2 className="animate-spin text-primary mb-6" size={48} />
                 <div className="space-y-2">
-                  <p className="text-xl font-display text-white uppercase tracking-wider animate-pulse">Running Neural Vision</p>
-                  <p className="text-xs text-muted font-bold uppercase tracking-tighter">Scanning for fibers & text...</p>
+                  <p className="text-xl font-display text-white uppercase tracking-wider animate-pulse">Processing Multi-Modal Data</p>
+                  <p className="text-xs text-muted font-bold uppercase tracking-tighter">Gemini 3 Pro Analysing Frame Sequence...</p>
                 </div>
               </MotionDiv>
             ) : analysis && (
               <MotionDiv initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-                {analysis?.summary?.toLowerCase()?.includes('demo analysis') && (
-                  <div className="p-3 mb-4 rounded-md bg-yellow-900/20 border border-yellow-700 text-yellow-200 text-xs">
-                    Demo mode: No server-side API key is configured. Results are simulated. Deploy to Vercel and set API_KEY to enable real analysis.
-                  </div>
-                )}
-
                 <div className={`p-6 rounded-3xl border-2 flex items-center gap-6 ${
                   analysis.severity === 'extreme' || analysis.severity === 'high' ? 'bg-danger/10 border-danger shadow-[0_0_40px_rgba(244,63,94,0.2)]' : 'bg-primary/10 border-primary/40'
                 }`}>
@@ -199,19 +184,32 @@ const Visualizer: React.FC = () => {
                 </div>
 
                 <div className="glass-card p-6 space-y-4">
-                  <h4 className="text-xs font-bold text-accent uppercase tracking-widest border-b border-white/5 pb-2">Vision Detections</h4>
+                  <h4 className="text-xs font-bold text-accent uppercase tracking-widest border-b border-white/5 pb-2">Detected Risk Factors</h4>
                   <div className="flex flex-wrap gap-2">
                     {analysis.detections?.map((d: string, i: number) => (
-                      <span key={i} className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-white border border-white/10 uppercase font-bold flex items-center gap-2">
-                        <Search size={10} /> {d}
+                      <span key={i} className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-white border border-white/10 uppercase font-bold">
+                        {d}
                       </span>
                     ))}
                   </div>
                 </div>
 
                 <div className="glass-card p-6 space-y-4">
-                  <h4 className="text-xs font-bold text-secondary uppercase tracking-widest border-b border-white/5 pb-2">AI Findings</h4>
-                  <p className="text-sm text-gray-300 leading-relaxed italic">"{analysis.summary}"</p>
+                  <h4 className="text-xs font-bold text-secondary uppercase tracking-widest border-b border-white/5 pb-2">Remediation Plan</h4>
+                  <div className="space-y-3">
+                    {analysis.remediationPlan?.map((step: string, i: number) => (
+                      <div key={i} className="flex gap-4 items-start">
+                        <div className="w-5 h-5 rounded bg-secondary/20 flex items-center justify-center shrink-0 text-secondary text-[10px] font-bold">
+                          {i + 1}
+                        </div>
+                        <p className="text-sm text-gray-300 leading-snug">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                  <p className="text-xs text-gray-400 italic">"Summary: {analysis.summary}"</p>
                 </div>
               </MotionDiv>
             )}
