@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
-import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Users, AlertCircle, Mail, Search, MessageSquare, Send, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const EducationHub: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const articles = [
     { title: "Understanding Modacrylic & Silica", category: "Materials", desc: "Why 'Glass Free' marketing can still mean hazardous fire barriers." },
     { title: "HVAC Contamination Dynamics", category: "Physics", desc: "How particles travel through ductwork and why filter changes aren't enough." },
     { title: "Legal Rights & Class Actions", category: "Legal", desc: "Current status of lawsuits against Zinus, Ashley Furniture, and others." },
     { title: "Health Impacts of Inhalation", category: "Medical", desc: "Differentiating between temporary irritation and chronic respiratory issues." }
   ];
+
+  const handleDeepDive = async (topic: string) => {
+    setIsLoading(true);
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: `Explain "${topic}" in the context of mattress fiberglass safety. Keep it concise (under 100 words) but highly technical and accurate.`
+        });
+        setActiveAnalysis(response.text || "Analysis unavailable.");
+    } catch(e) {
+        setActiveAnalysis("Neural uplink failed.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4 space-y-8">
@@ -28,12 +49,30 @@ export const EducationHub: React.FC = () => {
         />
       </div>
 
+      {activeAnalysis && (
+          <div className="p-6 bg-primary/10 border border-primary/30 rounded-2xl relative">
+              <div className="absolute top-4 right-4 text-primary cursor-pointer hover:text-white" onClick={() => setActiveAnalysis(null)}>Close</div>
+              <h3 className="text-primary font-bold uppercase text-xs tracking-widest mb-2 flex items-center gap-2">
+                  <Sparkles size={12} /> Gemini 3 Analysis
+              </h3>
+              <p className="text-gray-200 text-sm leading-relaxed">{activeAnalysis}</p>
+          </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6">
         {articles.filter(a => a.title.toLowerCase().includes(searchTerm.toLowerCase())).map((article, i) => (
-          <div key={i} className="glass-card p-8 hover:bg-white/5 transition-colors cursor-pointer group">
+          <div key={i} className="glass-card p-8 hover:bg-white/5 transition-colors cursor-pointer group relative">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2 block">{article.category}</span>
             <h3 className="text-2xl font-display text-white uppercase mb-2 group-hover:text-accent transition-colors">{article.title}</h3>
-            <p className="text-muted text-sm">{article.desc}</p>
+            <p className="text-muted text-sm mb-4">{article.desc}</p>
+            <button 
+                onClick={(e) => { e.stopPropagation(); handleDeepDive(article.title); }}
+                disabled={isLoading}
+                className="text-[10px] font-bold text-accent uppercase tracking-widest flex items-center gap-2 hover:text-white"
+            >
+                {isLoading ? <Loader2 className="animate-spin" size={12} /> : <Sparkles size={12} />}
+                Ask AI to Explain
+            </button>
           </div>
         ))}
       </div>
@@ -42,6 +81,25 @@ export const EducationHub: React.FC = () => {
 };
 
 export const CommunityForum: React.FC = () => {
+  const [draftMode, setDraftMode] = useState(false);
+  const [aiDraft, setAiDraft] = useState("");
+  const [isDrafting, setIsDrafting] = useState(false);
+
+  const generateDraft = async () => {
+      setIsDrafting(true);
+      try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: "Draft a short, empathetic, and clear forum post for someone who just discovered fiberglass in their mattress. They are scared and need advice. Ask for help."
+        });
+        setAiDraft(response.text || "");
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setIsDrafting(false);
+      }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 text-center space-y-8">
       <div className="space-y-2">
@@ -55,14 +113,30 @@ export const CommunityForum: React.FC = () => {
         <p className="text-gray-300 max-w-xl mx-auto">
           We partner directly with the largest advocacy group on Facebook. Share your story, get emotional support, and compare photos with thousands of others who understand exactly what you are going through.
         </p>
-        <a 
-          href="https://facebook.com/donotremovethecover" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="neuro-btn bg-secondary text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2"
-        >
-          <MessageSquare size={20} /> JOIN DISCUSSION
-        </a>
+        <div className="flex justify-center gap-4">
+            <a 
+            href="https://facebook.com/donotremovethecover" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="neuro-btn bg-secondary text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2"
+            >
+            <MessageSquare size={20} /> JOIN DISCUSSION
+            </a>
+            <button 
+                onClick={() => { setDraftMode(!draftMode); if(!aiDraft) generateDraft(); }}
+                className="neuro-btn border border-white/10 text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2 hover:bg-white/5"
+            >
+                <Sparkles size={20} className={isDrafting ? "animate-spin" : ""} /> {draftMode ? "Close Assistant" : "AI Draft Helper"}
+            </button>
+        </div>
+
+        {draftMode && (
+            <div className="text-left bg-black/40 p-6 rounded-2xl border border-white/10 mt-6">
+                <p className="text-[10px] text-muted uppercase font-bold tracking-widest mb-2">Gemini Generated Draft:</p>
+                <p className="text-sm text-gray-300 italic mb-4">{aiDraft}</p>
+                <button className="text-xs text-secondary font-bold uppercase" onClick={() => navigator.clipboard.writeText(aiDraft)}>Copy to Clipboard</button>
+            </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Square, CheckCircle, Circle, AlertTriangle, ArrowRight, Shield, Volume2, Loader2, Sparkles, Wind, ExternalLink, Image } from 'lucide-react';
+import { Play, Square, CheckCircle, Circle, AlertTriangle, ArrowRight, Shield, Volume2, Loader2, Sparkles, Wind, ExternalLink, Image, ChevronDown, ChevronUp } from 'lucide-react';
 import { generateSpeech } from '../services/geminiService';
 import { base64ToUint8Array, decodeAudioData } from '../utils/audioUtils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,8 @@ const CleanupGuide: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [severity, setSeverity] = useState<'mild' | 'moderate' | 'severe'>('moderate');
+  const [severity, setSeverity] = useState<'mild' | 'moderate' | 'severe' | 'none'>('moderate');
+  const [expandedDetails, setExpandedDetails] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -26,6 +27,7 @@ const CleanupGuide: React.FC = () => {
         const resultSev = parsed.result?.severity?.toLowerCase();
         if (resultSev?.includes('mild') || resultSev?.includes('low')) setSeverity('mild');
         else if (resultSev?.includes('severe') || resultSev?.includes('high') || resultSev?.includes('extreme')) setSeverity('severe');
+        else if (resultSev?.includes('none') || resultSev?.includes('safe')) setSeverity('none');
         else setSeverity('moderate');
       } catch (e) { console.error(e); }
     }
@@ -34,7 +36,7 @@ const CleanupGuide: React.FC = () => {
     if (savedProgress) setCompletedSteps(JSON.parse(savedProgress));
   }, []);
 
-  const protocol = CLEANUP_PROTOCOLS[severity];
+  const protocol = CLEANUP_PROTOCOLS[severity] || CLEANUP_PROTOCOLS.moderate;
 
   const toggleStep = (stepTitle: string) => {
     const isCompleted = completedSteps.includes(stepTitle);
@@ -160,7 +162,7 @@ const CleanupGuide: React.FC = () => {
               className="glass-card p-8 md:p-12 h-full flex flex-col relative overflow-hidden"
             >
               {/* Background Ambient Glow */}
-              <div className={`absolute top-0 right-0 w-64 h-64 ${protocol.bgColor.replace('/10', '/5')} rounded-full blur-[100px] pointer-events-none`} />
+              <div className={`absolute top-0 right-0 w-64 h-64 ${protocol.bgColor.replace('/10', '/5').replace('/20', '/5')} rounded-full blur-[100px] pointer-events-none`} />
 
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-8">
@@ -178,32 +180,16 @@ const CleanupGuide: React.FC = () => {
                    </div>
                 </div>
 
-                <div className="space-y-6 flex-1">
+                <div className="space-y-6 flex-1 overflow-y-auto pr-2 scrollbar-hide">
                   <div>
                     <h2 className="text-4xl md:text-5xl font-display text-white uppercase tracking-tight leading-[0.9] mb-4">
                       {protocol.steps[activeStep].title}
                     </h2>
-                    <p className="text-xl text-white font-medium">{protocol.steps[activeStep].description}</p>
+                    <p className="text-lg text-white font-medium italic opacity-90">{protocol.steps[activeStep].description}</p>
                   </div>
 
-                  <div className="p-6 bg-black/40 border border-white/10 rounded-2xl leading-relaxed text-gray-300 text-sm md:text-base">
+                  <div className="p-6 bg-black/40 border border-white/10 rounded-2xl leading-relaxed text-gray-300 text-sm md:text-base whitespace-pre-wrap">
                     {protocol.steps[activeStep].details}
-                  </div>
-
-                  {/* Contextual Visual Aid (Mocked based on step) */}
-                  <div className="h-48 w-full rounded-2xl overflow-hidden relative group">
-                    <img 
-                      src={
-                        activeStep === 0 ? "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2574&auto=format&fit=crop" : // Flashlight/Inspection
-                        activeStep === 1 ? "https://images.unsplash.com/photo-1581093583449-ed252134425b?q=80&w=2669&auto=format&fit=crop" : // HVAC
-                        "https://images.unsplash.com/photo-1584634731339-252c581abfc5?q=80&w=2674&auto=format&fit=crop" // Cleaning/PPE
-                      } 
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                      alt="Step Visualization"
-                    />
-                    <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-1 rounded text-[10px] font-bold uppercase text-white flex items-center gap-2">
-                      <Image size={12} /> Reference Visualization
-                    </div>
                   </div>
                 </div>
 

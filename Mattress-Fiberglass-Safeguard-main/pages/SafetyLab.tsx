@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Image as ImageIcon, Wand2, Download, Loader2, Sparkles, Sliders, ChevronDown, Camera, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Image as ImageIcon, Wand2, Download, Loader2, Sparkles, Sliders, AlertTriangle } from 'lucide-react';
 import { generateSafetyGraphic } from '../services/geminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,16 +10,23 @@ const SafetyLab: React.FC = () => {
   const [size, setSize] = useState<'1K' | '2K' | '4K'>('1K');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     setGeneratedImage(null);
+    setError(null);
     try {
       const img = await generateSafetyGraphic(prompt, size);
-      setGeneratedImage(img);
+      if (img) {
+        setGeneratedImage(img);
+      } else {
+        setError("Generation failed. Please try a different prompt or check API quota.");
+      }
     } catch (error) {
       console.error(error);
+      setError("System Error: Could not connect to visual synthesis engine.");
     } finally {
       setIsGenerating(false);
     }
@@ -76,6 +83,12 @@ const SafetyLab: React.FC = () => {
               {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles />}
               {isGenerating ? 'SYNTHESIZING...' : 'INITIALIZE GENERATION'}
             </button>
+            
+            {error && (
+              <div className="p-4 bg-danger/10 border border-danger/30 rounded-xl text-xs text-danger flex items-center gap-2">
+                <AlertTriangle size={16} /> {error}
+              </div>
+            )}
           </div>
 
           <div className="p-6 bg-secondary/5 border border-secondary/20 rounded-3xl">

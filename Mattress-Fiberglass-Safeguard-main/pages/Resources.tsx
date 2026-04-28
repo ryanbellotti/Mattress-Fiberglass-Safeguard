@@ -8,7 +8,7 @@ const Resources: React.FC = () => {
       icon: Shield,
       color: "text-primary",
       links: [
-        { title: "Mattress Fiberglass Organization", desc: "Main website with comprehensive info", url: "https://mattressfiberglass.org" },
+        { title: "Mattress Fiberglass Organization", desc: "Main website with comprehensive info", url: "https://www.mattressfiberglass.org" },
         { title: "California Dept of Public Health", desc: "Official fact sheet about fiberglass", url: "https://cdph.ca.gov" },
         { title: "NIH - Fiberglass Exposure", desc: "Scientific research on health impacts", url: "https://nih.gov" }
       ]
@@ -28,8 +28,8 @@ const Resources: React.FC = () => {
       icon: Users,
       color: "text-secondary",
       links: [
-        { title: "Facebook - Do Not Remove Cover", desc: "Follow for updates", url: "https://facebook.com" },
-        { title: "Facebook Group - Support", desc: "Join community for shared experiences", url: "https://facebook.com" }
+        { title: "Facebook - Do Not Remove Cover", desc: "Follow for updates", url: "https://facebook.com/donotremovethecover" },
+        { title: "Facebook Group - Support", desc: "Join community for shared experiences", url: "https://facebook.com/groups/donotremovethecover" }
       ]
     },
     {
